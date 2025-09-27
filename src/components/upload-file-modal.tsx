@@ -128,6 +128,7 @@ export function UploadFileModal({
         target: `${vaultPackageId}::vault::upload_file_entry`,
         arguments: [
           tx.object(vaultStoreObjectId), // VaultStore shared object ID
+          tx.pure.address(currentAccount.address),
           tx.pure.vector(
             "u8",
             Array.from(new TextEncoder().encode(dummyWalrusBlobId))
