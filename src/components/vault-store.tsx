@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useSuiClientQuery } from "@mysten/dapp-kit";
+import { useSuiClientQuery, useCurrentAccount } from "@mysten/dapp-kit";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
@@ -7,16 +7,12 @@ import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Skeleton } from "./ui/skeleton";
 import { useNetworkVariable } from "../networkConfig";
 import { 
-  Archive, 
   Download, 
-  File, 
-  FileText, 
   Folder, 
   Globe, 
   Lock, 
   RefreshCw, 
   Search, 
-  User, 
   Database,
   AlertCircle,
   Terminal
@@ -45,6 +41,7 @@ interface VaultEntry {
 
 export function VaultStore() {
   const vaultPackageId = useNetworkVariable("vaultPackageId");
+  const currentAccount = useCurrentAccount();
   const [vaultEntries, setVaultEntries] = useState<VaultEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -52,23 +49,27 @@ export function VaultStore() {
   const [typeFilter, setTypeFilter] = useState<"all" | "encrypted" | "public">("all");
   const [ownerFilter, setOwnerFilter] = useState<string>("all");
 
-  // Get unique owners from vault entries
+  // Get unique owners from vault entries (should only be current user now)
   const uniqueOwners = [...new Set(vaultEntries.map((entry) => entry.owner))].sort();
 
   // Filter vault entries based on current filters
   const filteredEntries = vaultEntries.filter((entry) => {
+    // Only show entries owned by the current user
+    const isOwnedByCurrentUser = currentAccount?.address && 
+      entry.owner.toLowerCase() === currentAccount.address.toLowerCase();
+
     // Type filter
     const typeMatch =
       typeFilter === "all" ||
       (typeFilter === "encrypted" && entry.is_encrypted) ||
       (typeFilter === "public" && !entry.is_encrypted);
 
-    // Owner filter
+    // Owner filter (only for display purposes, but we always filter by current user)
     const ownerMatch =
       ownerFilter === "all" ||
       entry.owner.toLowerCase() === ownerFilter.toLowerCase();
 
-    return typeMatch && ownerMatch;
+    return isOwnedByCurrentUser && typeMatch && ownerMatch;
   });
 
   // Function to download file via CDN
@@ -416,7 +417,7 @@ export function VaultStore() {
             Upload your first file to the vault!
           </p>
           <p className="text-sm text-muted-foreground">
-            Use the upload functionality to store files securely.
+            Use the upload functionality to store files securely. Only your files will be displayed here.
           </p>
         </Card>
       </div>
@@ -432,7 +433,7 @@ export function VaultStore() {
           Vault Files
         </h1>
         <p className="text-muted-foreground text-lg">
-          Browse and download files stored in your decentralized vault.
+          Browse and download your files stored in the decentralized vault.
         </p>
       </div>
 

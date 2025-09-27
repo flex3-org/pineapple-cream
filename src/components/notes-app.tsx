@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { useSuiClientQuery } from "@mysten/dapp-kit";
+import { useSuiClientQuery, useCurrentAccount } from "@mysten/dapp-kit";
 import { useNetworkVariable } from "../networkConfig";
 import { LeftSidebar } from "./left-sidebar";
 import { CenterEditor } from "./center-editor";
@@ -26,6 +26,7 @@ export interface Note {
   fileExtension?: string;
   secondary_blob_id?: string;
   file_metadata?: VaultFileMetadata;
+  owner?: string;
 }
 
 export interface Folder {
@@ -45,6 +46,7 @@ export interface Tab {
 
 export function NotesApp() {
   const vaultStoreObjectId = useNetworkVariable("vaultStoreObjectId");
+  const currentAccount = useCurrentAccount();
 
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
@@ -233,9 +235,15 @@ export function NotesApp() {
             : undefined,
           secondary_blob_id,
           file_metadata: fileMetadata,
+          owner: fields.owner || "Unknown",
         };
 
-        processedNotes.push(note);
+        // Only add notes owned by the current user
+        if (currentAccount?.address && 
+            note.owner && 
+            note.owner.toLowerCase() === currentAccount.address.toLowerCase()) {
+          processedNotes.push(note);
+        }
       }
 
       setNotes(processedNotes);
