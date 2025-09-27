@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { ConnectButton, useCurrentAccount } from "@mysten/dapp-kit";
+import { useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import {
   ArrowRight,
@@ -11,15 +12,19 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-interface LandingPageProps {
-  onNavigateToDashboard: () => void;
-}
-
-export function LandingPage({ onNavigateToDashboard }: LandingPageProps) {
+export function LandingPage() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
   const textRef = useRef<HTMLDivElement>(null);
   const currentAccount = useCurrentAccount();
+  const navigate = useNavigate();
+
+  const navigateToDashboard = () => {
+    // Only allow navigation to dashboard if wallet is connected
+    if (currentAccount) {
+      navigate("/dashboard");
+    }
+  };
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -138,7 +143,7 @@ export function LandingPage({ onNavigateToDashboard }: LandingPageProps) {
           <ConnectButton />
           {currentAccount && (
             <Button
-              onClick={onNavigateToDashboard}
+              onClick={navigateToDashboard}
               className="bg-[#97F0E5] hover:bg-[#97F0E5]/700 text-black px-6 py-2 rounded-md font-medium"
             >
               VIEW DASHBOARD
@@ -349,7 +354,7 @@ export function LandingPage({ onNavigateToDashboard }: LandingPageProps) {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             {currentAccount ? (
               <Button
-                onClick={onNavigateToDashboard}
+                onClick={navigateToDashboard}
                 className="bg-[#97F0E5] hover:bg-[#97F0E5]/700 text-black px-8 py-3 text-lg"
               >
                 Explore Dashboard

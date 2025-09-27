@@ -1,8 +1,6 @@
-
 import { useState, useEffect } from "react"
 import { Button } from "../components/ui/button"
 import { ScrollArea } from "../components/ui/scroll-area"
-import { Textarea } from "../components/ui/textarea"
 import { X, FileText, Circle } from "lucide-react"
 import { cn } from "../lib/utils"
 import type { Note, Tab } from "./notes-app"
@@ -14,9 +12,9 @@ interface CenterEditorProps {
   activeNote: Note | null
   onTabSelect: (tabId: string) => void
   onTabClose: (tabId: string) => void
-  onNoteUpdate?: (noteId: string, content: string, title?: string) => void
   viewMode: "editor" | "graph"
   notes: Note[]
+  downloadFile?: (secondary_blob_id: string, fileName: string) => void
 }
 
 export function CenterEditor({
@@ -25,9 +23,9 @@ export function CenterEditor({
   activeNote,
   onTabSelect,
   onTabClose,
-  onNoteUpdate,
   viewMode,
   notes,
+  downloadFile,
 }: CenterEditorProps) {
   const [content, setContent] = useState("")
   const [title, setTitle] = useState("")
@@ -39,17 +37,7 @@ export function CenterEditor({
     }
   }, [activeNote])
 
-  useEffect(() => {
-    if (!activeNote || !onNoteUpdate) return
-
-    const timeoutId = setTimeout(() => {
-      if (content !== activeNote.content || title !== activeNote.title) {
-        onNoteUpdate(activeNote.id, content, title)
-      }
-    }, 1000) // Auto-save after 1 second of inactivity
-
-    return () => clearTimeout(timeoutId)
-  }, [content, title, activeNote, onNoteUpdate])
+  // No auto-save needed since everything is view-only
 
   if (viewMode === "graph") {
     return (
@@ -119,15 +107,11 @@ export function CenterEditor({
       {/* Editor Area */}
       {activeNote && (
         <div className="flex-1 flex flex-col">
-          {/* Note Title */}
+          {/* Title - View Only */}
           <div className="p-4 border-b border-border">
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="text-2xl font-bold bg-transparent border-none outline-none w-full text-foreground placeholder:text-muted-foreground"
-              placeholder="Untitled"
-            />
+            <div className="text-2xl font-bold text-foreground">
+              {title || "Untitled"}
+            </div>
             <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
               <span>Created {activeNote.createdAt.toLocaleDateString()}</span>
               <span>Modified {activeNote.updatedAt.toLocaleDateString()}</span>
@@ -144,15 +128,122 @@ export function CenterEditor({
             </div>
           </div>
 
-          {/* Content Editor */}
+          {/* Content Display - View Only */}
           <div className="flex-1 p-4">
-            <Textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="Start writing..."
-              className="w-full h-full resize-none border-none bg-transparent text-base leading-relaxed focus-visible:ring-0 focus-visible:ring-offset-0 font-mono"
-              style={{ minHeight: "calc(100vh - 200px)" }}
-            />
+            {activeNote.isFile && activeNote.secondary_blob_id ? (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="text-3xl">
+                      {activeNote.fileExtension === 'pdf' ? '📄' :
+                        activeNote.fileExtension === 'jpg' || activeNote.fileExtension === 'png' || activeNote.fileExtension === 'gif' ? '🖼️' :
+                          activeNote.fileExtension === 'zip' || activeNote.fileExtension === 'rar' ? '📦' :
+                            activeNote.fileExtension === 'txt' || activeNote.fileExtension === 'md' ? '📝' :
+                              '📁'}
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">{activeNote.title}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {activeNote.fileExtension?.toUpperCase()} File
+                        {activeNote.file_metadata?.file_size &&
+                          ` • ${(activeNote.file_metadata.file_size / 1024 / 1024).toFixed(2)} MB`
+                        }
+                      </p>
+                    </div>
+                  </div>
+                  {downloadFile && (
+                    <Button
+                      onClick={() => downloadFile(activeNote.secondary_blob_id!, activeNote.title)}
+                      className="bg-primary hover:bg-primary/90"
+                    >
+                      ⬇️ Download File
+                    </Button>
+                  )}
+                </div>
+
+                {/* File Preview Area - Images Only with IMG tag */}
+                <div className="bg-muted/30 rounded-lg p-4 min-h-[400px]">
+                  {/* Image Preview - ONLY using IMG tag */}
+                  {(activeNote.fileExtension === 'jpg' ||
+                    activeNote.fileExtension === 'jpeg' ||
+                    activeNote.fileExtension === 'png' ||
+                    activeNote.fileExtension === 'gif' ||
+                    activeNote.fileExtension === 'webp') && 
+                    activeNote.secondary_blob_id && 
+                    !activeNote.secondary_blob_id.startsWith("walrus_") && (
+                      <div className="text-center">
+                        <img
+                          src={`https://aggregator.walrus-testnet.walrus.space/v1/blobs/by-quilt-patch-id/${activeNote.secondary_blob_id}`}
+                          alt={`${activeNote.title} preview`}
+                          style={{
+                            width: "100%",
+                            maxWidth: "100%",
+                            maxHeight: "600px",
+                            objectFit: "contain",
+                            borderRadius: "8px",
+                            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)"
+                          }}
+                          onError={(e) => {
+                            // Fallback when image fails to load
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            const parent = target.parentElement;
+                            if (parent) {
+                              const fallbackDiv = document.createElement("div");
+                              fallbackDiv.className = "text-center text-muted-foreground mt-4";
+                              fallbackDiv.innerHTML = `
+                                <div class="text-4xl mb-2">🖼️</div>
+                                <p class="text-lg font-semibold mb-2">Unable to load image</p>
+                                <p class="text-sm">Use the download button to access the file</p>
+                              `;
+                              parent.appendChild(fallbackDiv);
+                            }
+                          }}
+                        />
+                      </div>
+                    )}
+
+                  {/* Non-Image Files OR Images without valid blob ID - Show info only */}
+                  {(!['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(activeNote.fileExtension || '') ||
+                    !activeNote.secondary_blob_id ||
+                    activeNote.secondary_blob_id.startsWith("walrus_")) && (
+                    <div className="text-center text-muted-foreground">
+                      <div className="text-6xl mb-4">
+                        {activeNote.fileExtension === 'pdf' ? '📄' :
+                          activeNote.fileExtension === 'jpg' || activeNote.fileExtension === 'jpeg' || 
+                          activeNote.fileExtension === 'png' || activeNote.fileExtension === 'gif' || 
+                          activeNote.fileExtension === 'webp' ? '🖼️' :
+                          activeNote.fileExtension === 'zip' || activeNote.fileExtension === 'rar' ? '📦' :
+                            activeNote.fileExtension === 'txt' || activeNote.fileExtension === 'md' ? '📝' :
+                              '📁'}
+                      </div>
+                      <h3 className="text-lg font-semibold mb-2">{activeNote.title}</h3>
+                      <p className="mb-4">{activeNote.fileExtension?.toUpperCase()} File</p>
+                      <p className="text-sm">
+                        {['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(activeNote.fileExtension || '') 
+                          ? "Image preview not available. Use the download button to access the file."
+                          : "Use the download button above to access the file content."
+                        }
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              /* Note Content - View Only */
+              <div className="space-y-4">
+                <div className="bg-muted/30 rounded-lg p-6 min-h-[400px]">
+                  <div className="prose prose-sm max-w-none dark:prose-invert">
+                    <pre className="whitespace-pre-wrap font-mono text-sm leading-relaxed">
+                      {content || "No content available"}
+                    </pre>
+                  </div>
+                </div>
+                <div className="text-center text-muted-foreground text-sm p-4 bg-muted/20 rounded-lg">
+                  📝 Notes are view-only. Use "New Note" to create new content.
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

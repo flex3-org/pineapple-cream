@@ -16,12 +16,14 @@ interface LeftSidebarProps {
   folders: Folder[];
   onNoteSelect: (noteId: string) => void;
   onNewNote?: () => void;
+  downloadFile?: (secondary_blob_id: string, fileName: string) => void;
 }
 
 export function LeftSidebar({
   notes,
   folders,
   onNoteSelect,
+  downloadFile,
 }: LeftSidebarProps) {
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
     new Set(["blockchain", "daily", "research"])
@@ -103,18 +105,41 @@ export function LeftSidebar({
                       size="sm"
                       onClick={() => handleNoteSelect(note.id)}
                       className={cn(
-                        "w-full justify-start h-8 px-2 text-sidebar-foreground hover:bg-sidebar-accent",
+                        "w-full justify-start h-8 px-2 text-sidebar-foreground hover:bg-sidebar-accent group",
                         selectedNoteId === note.id &&
                           "bg-sidebar-accent text-sidebar-accent-foreground"
                       )}
                     >
-                      <FileText className="h-3 w-3 mr-2 flex-shrink-0" />
+                      {note.isFile ? (
+                        <span className="mr-2 flex-shrink-0">
+                          {note.fileExtension === 'pdf' ? '📄' :
+                           note.fileExtension === 'jpg' || note.fileExtension === 'png' || note.fileExtension === 'gif' ? '🖼️' :
+                           note.fileExtension === 'zip' || note.fileExtension === 'rar' ? '📦' :
+                           note.fileExtension === 'txt' || note.fileExtension === 'md' ? '📝' :
+                           '📁'}
+                        </span>
+                      ) : (
+                        <FileText className="h-3 w-3 mr-2 flex-shrink-0" />
+                      )}
                       <span className="text-sm truncate flex-1 text-left">
                         {note.title}
                       </span>
                       <span className="text-xs text-muted-foreground ml-2 flex-shrink-0">
                         {formatDate(note.updatedAt)}
                       </span>
+                      {note.isFile && note.secondary_blob_id && downloadFile && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            downloadFile(note.secondary_blob_id!, note.title);
+                          }}
+                          className="h-6 w-6 p-0 ml-1 opacity-0 group-hover:opacity-100 hover:bg-primary/20"
+                        >
+                          ⬇️
+                        </Button>
+                      )}
                     </Button>
                   ))}
                 </div>

@@ -1,33 +1,33 @@
-import { useState } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { useCurrentAccount } from "@mysten/dapp-kit";
 import { LandingPage } from "./components/landing-page";
 import { NotesApp } from "./components/notes-app";
 
-export function App() {
-  const [currentView, setCurrentView] = useState<"landing" | "dashboard">(
-    "landing"
-  );
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const currentAccount = useCurrentAccount();
-
-  const navigateToDashboard = () => {
-    // Only allow navigation to dashboard if wallet is connected
-    if (currentAccount) {
-      setCurrentView("dashboard");
-    }
-  };
-
-  const navigateToLanding = () => {
-    setCurrentView("landing");
-  };
-
-  if (currentView === "landing") {
-    return <LandingPage onNavigateToDashboard={navigateToDashboard} />;
-  }
-
-  // If user tries to access dashboard without wallet, redirect to landing
+  
   if (!currentAccount) {
-    return <LandingPage onNavigateToDashboard={navigateToDashboard} />;
+    return <Navigate to="/" replace />;
   }
+  
+  return <>{children}</>;
+}
 
-  return <NotesApp onNavigateToLanding={navigateToLanding} />;
+export function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route 
+          path="/dashboard" 
+          element={
+            <ProtectedRoute>
+              <NotesApp />
+            </ProtectedRoute>
+          } 
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Router>
+  );
 }
