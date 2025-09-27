@@ -33,15 +33,36 @@ def text_analysis(text, area):
     {text}
     """
 
-    response = requests.post('http://localhost:11434/api/generate',
-                             json={
-                                 'model': 'mistral:latest',
-                                 'prompt': prompt,
-                                 'stream': False
-                             })
+    try:
+        response = requests.post(
+            'http://localhost:11434/api/generate',
+            json={
+                'model': 'gemma:2b',
+                'prompt': prompt,
+                'stream': False
+            },
+            timeout=10  # avoid hanging indefinitely
+        )
+        response.raise_for_status()  # raise error for 4xx/5xx
+    except requests.exceptions.ConnectionError:
+        return {
+            "error":
+            "Ollama server not reachable. Make sure `ollama serve` is running."
+        }
+    except requests.exceptions.Timeout:
+        return {"error": "Ollama server timed out. Try again later."}
+    except requests.exceptions.HTTPError as e:
+        return {
+            "error": f"Ollama returned an HTTP error: {e.response.status_code}"
+        }
+    except Exception as e:
+        return {"error": str(e)}
 
-    result = response.json()
-    return result['response']
+    try:
+        result = response.json()
+        return result.get('response', 'No response returned from Ollama')
+    except Exception as e:
+        return {"error": f"Failed to parse Ollama response: {str(e)}"}
 
 
 @app.post("/analyze")
