@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import {
   Plus,
@@ -7,7 +8,6 @@ import {
   Search,
   ArrowLeft,
   Upload,
-  Database,
 } from "lucide-react";
 import { Input } from "../components/ui/input";
 import { UploadFileModal } from "./upload-file-modal";
@@ -17,37 +17,32 @@ interface TopToolbarProps {
   onCreateNote: (title: string, content: string) => void;
   onNewFolder: () => void;
   onToggleView: () => void;
-  onToggleVault: () => void;
-  viewMode: "editor" | "graph" | "vault";
-  onNavigateToLanding?: () => void;
+  viewMode: "editor" | "graph";
 }
 
 export function TopToolbar({
   onCreateNote,
   onNewFolder,
   onToggleView,
-  onToggleVault,
   viewMode,
-  onNavigateToLanding,
 }: TopToolbarProps) {
   const [isFileModalOpen, setIsFileModalOpen] = useState(false);
   const [isCreateNoteOpen, setIsCreateNoteOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <>
       <div className="h-12 border-b border-border bg-card flex items-center justify-between px-4">
         <div className="flex items-center gap-2">
-          {onNavigateToLanding && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onNavigateToLanding}
-              className="h-8 px-2 text-muted-foreground hover:text-foreground"
-            >
-              <ArrowLeft className="h-4 w-4 mr-1" />
-              Back to Home
-            </Button>
-          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/")}
+            className="h-8 px-2 text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Back to Home
+          </Button>
 
           <Button
             variant="ghost"
@@ -93,20 +88,6 @@ export function TopToolbar({
           >
             <Network className="h-4 w-4 mr-1" />
             Graph View
-          </Button>
-
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onToggleVault}
-            className={`h-8 px-2 ${
-              viewMode === "vault"
-                ? "text-primary bg-primary/10"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <Database className="h-4 w-4 mr-1" />
-            Vault Store
           </Button>
         </div>
 

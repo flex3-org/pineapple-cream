@@ -516,18 +516,14 @@ export function VaultStore() {
                     {entry.is_encrypted ? "Encrypted" : "Public"}
                   </p>
                   {/* Download Button overlay */}
-                  {(entry.walrus_blob_id && !entry.walrus_blob_id.startsWith("walrus_")) ||
-                   (entry.secondary_blob_id && !entry.secondary_blob_id.startsWith("walrus_")) ? (
+                  {entry.secondary_blob_id && !entry.secondary_blob_id.startsWith("walrus_") ? (
                       <Button
                         size="sm"
                         variant="secondary"
                         onClick={(e: React.MouseEvent) => {
                           e.stopPropagation();
-                          // Use secondary_blob_id if walrus_blob_id is not available or invalid
-                          const blobId = (entry.walrus_blob_id && !entry.walrus_blob_id.startsWith("walrus_")) 
-                            ? entry.walrus_blob_id 
-                            : entry.secondary_blob_id;
-                          downloadFile(blobId, entry.title, entry);
+                          // Use secondary_blob_id for data retrieval/fetching
+                          downloadFile(entry.secondary_blob_id, entry.title, entry);
                         }}
                         className="bg-white/15 text-white border-white/30 hover:bg-white/25"
                       >
