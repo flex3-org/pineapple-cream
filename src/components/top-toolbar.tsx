@@ -7,6 +7,7 @@ import {
   Search,
   ArrowLeft,
   Upload,
+  Database,
 } from "lucide-react";
 import { Input } from "../components/ui/input";
 import { UploadFileModal } from "./upload-file-modal";
@@ -16,7 +17,8 @@ interface TopToolbarProps {
   onCreateNote: (title: string, content: string) => void;
   onNewFolder: () => void;
   onToggleView: () => void;
-  viewMode: "editor" | "graph";
+  onToggleVault: () => void;
+  viewMode: "editor" | "graph" | "vault";
   onNavigateToLanding?: () => void;
 }
 
@@ -24,6 +26,7 @@ export function TopToolbar({
   onCreateNote,
   onNewFolder,
   onToggleView,
+  onToggleVault,
   viewMode,
   onNavigateToLanding,
 }: TopToolbarProps) {
@@ -90,6 +93,20 @@ export function TopToolbar({
           >
             <Network className="h-4 w-4 mr-1" />
             Graph View
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggleVault}
+            className={`h-8 px-2 ${
+              viewMode === "vault"
+                ? "text-primary bg-primary/10"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Database className="h-4 w-4 mr-1" />
+            Vault Store
           </Button>
         </div>
 

@@ -18,6 +18,8 @@ import { Progress } from "./ui/progress";
 import { useNetworkVariable } from "../networkConfig";
 import { toast } from "sonner";
 import { Upload, FileText } from "lucide-react";
+import { getWalrusClient } from "../lib/walrus";
+import { WalrusFile } from "@mysten/walrus";
 
 interface FileMetadata {
   filename: string;
@@ -58,6 +60,178 @@ export function UploadFileModal({
   const { mutate: signAndExecute, isPending: isTransactionPending } =
     useSignAndExecuteTransaction();
 
+  // Walrus upload function
+  const uploadToWalrus = async (
+    file: File,
+    identifier: string,
+    retryCount: number = 0
+  ): Promise<{ blobId: string; patchId: string; actualSize: number }> => {
+    if (!currentAccount) {
+      throw new Error("Wallet not connected");
+    }
+
+    const maxRetries = 3;
+    const isRetry = retryCount > 0;
+
+    try {
+      console.log(
+        `🚀 ${
+          isRetry ? `[Retry ${retryCount}/${maxRetries}] ` : ""
+        }Starting Walrus upload: ${identifier} (${file.size} bytes)`
+      );
+
+      // Create WalrusFile
+      const walrusFile = WalrusFile.from({
+        contents: file,
+        identifier: file.name,
+        tags: {
+          contentType: file.type,
+        },
+      });
+
+      console.log(`📦 Created WalrusFile for ${file.name}`, {
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+      });
+
+      // Get Walrus client and start upload flow
+      console.log(`🔄 Initializing Walrus client...`);
+      const walrusClient = await getWalrusClient();
+
+      console.log(`🔄 Starting Walrus upload flow...`);
+      const uploadStart = Date.now();
+
+      const flow = walrusClient.writeFilesFlow({
+        files: [walrusFile],
+      });
+
+      console.log(`📁 Encoding file for upload...`);
+      await flow.encode();
+      console.log(`✅ Encoding completed`);
+
+      console.log(`📝 Creating register transaction...`);
+      const registerTx = flow.register({
+        epochs: 2, // Store for 2 epochs (~12 days)
+        owner: currentAccount.address,
+        deletable: false,
+      });
+
+      // Sign and execute the register transaction
+      console.log(`✍️ Signing register transaction...`);
+      const registerResult = await new Promise<any>((resolve, reject) => {
+        signAndExecute(
+          { transaction: registerTx },
+          {
+            onSuccess: (result) => {
+              console.log(`✅ Space registered successfully:`, result.digest);
+              resolve(result);
+            },
+            onError: (error) => {
+              console.error(`❌ Space registration failed:`, error);
+              reject(error);
+            },
+          }
+        );
+      });
+
+      // Upload the data to storage nodes
+      console.log(`☁️ Uploading file data to Walrus storage nodes...`);
+      await flow.upload({
+        digest: registerResult.digest,
+      });
+
+      // Create and execute the certify transaction
+      console.log(`📋 Creating certify transaction...`);
+      const certifyTx = flow.certify();
+
+      await new Promise((resolve, reject) => {
+        signAndExecute(
+          { transaction: certifyTx },
+          {
+            onSuccess: (result) => {
+              console.log(`✅ Certify transaction successful:`, result.digest);
+              resolve(result);
+            },
+            onError: (error) => {
+              console.error(`❌ Certify transaction failed:`, error);
+              reject(error);
+            },
+          }
+        );
+      });
+
+      // Get the final blob ID
+      const files = await flow.listFiles();
+      if (files.length === 0) {
+        throw new Error("No files were uploaded successfully");
+      }
+
+      const uploadedFile = files[0];
+      const blobId = uploadedFile.blobId;
+      const patchId = uploadedFile.id;
+
+      console.log(`✅ Upload completed in ${Date.now() - uploadStart}ms`, {
+        blobId,
+        patchId,
+        identifier,
+        fileSize: file.size,
+      });
+
+      return { blobId, patchId, actualSize: file.size };
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      console.error(`💥 Walrus upload error for ${identifier}:`, {
+        error: errorMessage,
+        retryCount,
+        identifier,
+      });
+
+      // Check if this is a WASM-related error
+      if (
+        errorMessage.includes("WebAssembly") ||
+        errorMessage.includes("magic word")
+      ) {
+        throw new Error(
+          "Walrus WASM module failed to load. Please refresh the page and try again. If the issue persists, check your internet connection."
+        );
+      }
+
+      // Check if this is a retryable error and we haven't exceeded max retries
+      const isRetryableError =
+        errorMessage.includes("400") ||
+        errorMessage.includes("Bad Request") ||
+        errorMessage.includes("network") ||
+        errorMessage.includes("timeout");
+
+      if (isRetryableError && retryCount < maxRetries) {
+        console.log(
+          `🔄 Retrying upload for ${identifier} (attempt ${retryCount + 1}/${
+            maxRetries + 1
+          })`
+        );
+        // Wait before retrying
+        await new Promise((resolve) =>
+          setTimeout(resolve, 1000 * (retryCount + 1))
+        );
+        return uploadToWalrus(file, identifier, retryCount + 1);
+      }
+
+      throw new Error(
+        `Failed to upload ${identifier} after ${
+          retryCount + 1
+        } attempts: ${errorMessage}`
+      );
+    }
+  };
+
+  const getFileExtension = (file: File): string => {
+    const fileName = file.name;
+    const lastDotIndex = fileName.lastIndexOf(".");
+    return lastDotIndex !== -1 ? fileName.substring(lastDotIndex) : "";
+  };
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -96,30 +270,35 @@ export function UploadFileModal({
 
     try {
       setUploadProgress({
-        step: "Step 1/3: Processing file...",
+        step: "Step 1/3: Uploading file to Walrus...",
         progress: 33,
         isUploading: true,
       });
 
-      // Generate dummy Walrus blob ID for testing
-      const dummyWalrusBlobId = `dummy_blob_${Date.now()}_${Math.random()
-        .toString(36)
-        .substring(2, 11)}`;
+      // Upload file to Walrus
+      const fileExtension = getFileExtension(metadata.file);
+      const walrusResult = await uploadToWalrus(
+        metadata.file,
+        `${metadata.filename}${fileExtension}`
+      );
 
       setUploadProgress({
-        step: "Step 2/3: Uploading to storage...",
+        step: "Step 2/3: Registering on blockchain...",
         progress: 66,
         isUploading: true,
       });
 
-      // Simulate upload delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      setUploadProgress({
-        step: "Step 3/3: Registering on blockchain...",
-        progress: 90,
-        isUploading: true,
-      });
+      // Prepare enhanced metadata
+      const enhancedMetadata = {
+        originalFile: {
+          name: metadata.file.name,
+          size: metadata.file.size,
+          type: metadata.file.type || "application/octet-stream",
+          patchId: walrusResult.patchId,
+          blobId: walrusResult.blobId,
+          isEncrypted: false,
+        },
+      };
 
       // Create transaction to call vault contract
       const tx = new Transaction();
@@ -131,7 +310,7 @@ export function UploadFileModal({
           tx.pure.address(currentAccount.address),
           tx.pure.vector(
             "u8",
-            Array.from(new TextEncoder().encode(dummyWalrusBlobId))
+            Array.from(new TextEncoder().encode(walrusResult.blobId))
           ),
           tx.pure.vector(
             "u8",
@@ -146,9 +325,17 @@ export function UploadFileModal({
               )
             )
           ),
-          tx.pure.vector("u8", Array.from(new TextEncoder().encode("{}"))), // enhanced_metadata
-          tx.pure.vector("u8", Array.from(new TextEncoder().encode(""))), // secondary_blob_id
-          tx.pure.vector("u8", Array.from(new TextEncoder().encode(""))), // seal_encryption_id
+          tx.pure.vector(
+            "u8",
+            Array.from(
+              new TextEncoder().encode(JSON.stringify(enhancedMetadata))
+            )
+          ), // enhanced_metadata
+          tx.pure.vector(
+            "u8",
+            Array.from(new TextEncoder().encode(walrusResult.patchId))
+          ), // secondary_blob_id (patchId for downloading)
+          tx.pure.vector("u8", Array.from(new TextEncoder().encode(""))), // seal_encryption_id (empty since no encryption)
         ],
       });
 
@@ -170,13 +357,13 @@ export function UploadFileModal({
       });
 
       setUploadProgress({
-        step: "File uploaded successfully!",
+        step: "Step 3/3: File uploaded successfully!",
         progress: 100,
         isUploading: false,
         success: true,
       });
 
-      toast.success("🎉 File uploaded successfully!");
+      toast.success("🎉 File uploaded to Walrus successfully!");
 
       // Reset form
       setMetadata({
@@ -198,13 +385,37 @@ export function UploadFileModal({
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error occurred";
+
+      // Provide more user-friendly error messages
+      let userFriendlyMessage = errorMessage;
+      if (errorMessage.includes("WASM module failed to load")) {
+        userFriendlyMessage = errorMessage; // Already user-friendly
+      } else if (
+        errorMessage.includes("400") ||
+        errorMessage.includes("Bad Request")
+      ) {
+        userFriendlyMessage =
+          "Storage nodes are having issues. This is usually temporary - please try again in a few minutes.";
+      } else if (
+        errorMessage.includes("network") ||
+        errorMessage.includes("timeout")
+      ) {
+        userFriendlyMessage =
+          "Network connection issue. Please check your internet and try again.";
+      } else if (errorMessage.includes("Wallet not connected")) {
+        userFriendlyMessage = "Please connect your wallet and try again.";
+      } else if (errorMessage.includes("rejected")) {
+        userFriendlyMessage =
+          "Transaction was rejected. Please try again and approve the transaction.";
+      }
+
       setUploadProgress({
         step: "Upload failed",
         progress: 0,
         isUploading: false,
-        error: errorMessage,
+        error: userFriendlyMessage,
       });
-      toast.error(`Upload failed: ${errorMessage}`);
+      toast.error(`Upload failed: ${userFriendlyMessage}`);
     }
   };
 

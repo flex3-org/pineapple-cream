@@ -3,6 +3,7 @@ import { LeftSidebar } from "./left-sidebar";
 import { CenterEditor } from "./center-editor";
 import { RightSidebar } from "./right-sidebar";
 import { TopToolbar } from "./top-toolbar";
+import { VaultStore } from "./vault-store";
 
 export interface Note {
   id: string;
@@ -120,7 +121,7 @@ export function NotesApp({ onNavigateToLanding }: NotesAppProps) {
 
   const [tabs, setTabs] = useState<Tab[]>([]);
   const [activeTabId, setActiveTabId] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<"editor" | "graph">("editor");
+  const [viewMode, setViewMode] = useState<"editor" | "graph" | "vault">("editor");
 
   const activeNote = activeTabId
     ? notes.find(
@@ -225,6 +226,10 @@ export function NotesApp({ onNavigateToLanding }: NotesAppProps) {
     setFolders((prev) => [...prev, newFolder]);
   }, []);
 
+  const toggleVaultView = useCallback(() => {
+    setViewMode((prev) => (prev === "vault" ? "editor" : "vault"));
+  }, []);
+
   return (
     <div className="h-screen bg-background text-foreground flex flex-col dark">
       <TopToolbar
@@ -233,25 +238,34 @@ export function NotesApp({ onNavigateToLanding }: NotesAppProps) {
         onToggleView={() =>
           setViewMode((prev) => (prev === "editor" ? "graph" : "editor"))
         }
+        onToggleVault={toggleVaultView}
         viewMode={viewMode}
         onNavigateToLanding={onNavigateToLanding}
       />
 
       <div className="flex-1 flex overflow-hidden">
-        <LeftSidebar notes={notes} folders={folders} onNoteSelect={openNote} />
+        {viewMode === "vault" ? (
+          <div className="flex-1 p-6 overflow-auto">
+            <VaultStore />
+          </div>
+        ) : (
+          <>
+            <LeftSidebar notes={notes} folders={folders} onNoteSelect={openNote} />
 
-        <CenterEditor
-          tabs={tabs}
-          activeTabId={activeTabId}
-          activeNote={activeNote}
-          onTabSelect={setActiveTabId}
-          onTabClose={closeTab}
-          onNoteUpdate={updateNoteContent}
-          viewMode={viewMode}
-          notes={notes}
-        />
+            <CenterEditor
+              tabs={tabs}
+              activeTabId={activeTabId}
+              activeNote={activeNote}
+              onTabSelect={setActiveTabId}
+              onTabClose={closeTab}
+              onNoteUpdate={updateNoteContent}
+              viewMode={viewMode}
+              notes={notes}
+            />
 
-        <RightSidebar activeNote={activeNote} allNotes={notes} />
+            <RightSidebar activeNote={activeNote} allNotes={notes} />
+          </>
+        )}
       </div>
     </div>
   );
