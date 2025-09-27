@@ -7,20 +7,13 @@ import {
   Search,
   ArrowLeft,
   Upload,
-  FileText,
 } from "lucide-react";
 import { Input } from "../components/ui/input";
 import { UploadFileModal } from "./upload-file-modal";
-import { UploadNoteModal } from "./upload-note-modal";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
+import { CreateNoteModal } from "./create-note-modal";
 
 interface TopToolbarProps {
-  onNewNote: () => void;
+  onCreateNote: (title: string, content: string) => void;
   onNewFolder: () => void;
   onToggleView: () => void;
   viewMode: "editor" | "graph";
@@ -28,14 +21,14 @@ interface TopToolbarProps {
 }
 
 export function TopToolbar({
-  onNewNote,
+  onCreateNote,
   onNewFolder,
   onToggleView,
   viewMode,
   onNavigateToLanding,
 }: TopToolbarProps) {
   const [isFileModalOpen, setIsFileModalOpen] = useState(false);
-  const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
+  const [isCreateNoteOpen, setIsCreateNoteOpen] = useState(false);
 
   return (
     <>
@@ -53,40 +46,15 @@ export function TopToolbar({
             </Button>
           )}
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 px-2 text-muted-foreground hover:text-foreground"
-              >
-                <Plus className="h-4 w-4 mr-1" />
-                New Note
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="start"
-              className="bg-gray-900 border-gray-700"
-            >
-              <DropdownMenuItem
-                onClick={onNewNote}
-                className="text-white hover:bg-gray-800 cursor-pointer"
-              >
-                <FileText className="h-4 w-4 mr-2" />
-                Local Note
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => {
-                  console.log("Blockchain Note clicked, opening modal");
-                  setIsNoteModalOpen(true);
-                }}
-                className="text-white hover:bg-gray-800 cursor-pointer"
-              >
-                <Upload className="h-4 w-4 mr-2" />
-                Blockchain Note
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsCreateNoteOpen(true)}
+            className="h-8 px-2 text-muted-foreground hover:text-foreground"
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            New Note
+          </Button>
 
           <Button
             variant="ghost"
@@ -136,7 +104,7 @@ export function TopToolbar({
         </div>
       </div>
 
-      {/* Upload Modals */}
+      {/* Modals */}
       <UploadFileModal
         isOpen={isFileModalOpen}
         onClose={() => setIsFileModalOpen(false)}
@@ -146,15 +114,12 @@ export function TopToolbar({
         }}
       />
 
-      <UploadNoteModal
-        isOpen={isNoteModalOpen}
-        onClose={() => {
-          console.log("Closing note modal");
-          setIsNoteModalOpen(false);
-        }}
-        onSuccess={(noteId) => {
-          console.log("Note uploaded successfully:", noteId);
-          // You can add logic here to refresh the note list or show success message
+      <CreateNoteModal
+        isOpen={isCreateNoteOpen}
+        onClose={() => setIsCreateNoteOpen(false)}
+        onSubmit={(title, content) => {
+          onCreateNote(title, content);
+          setIsCreateNoteOpen(false);
         }}
       />
     </>

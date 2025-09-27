@@ -171,19 +171,22 @@ export function NotesApp({ onNavigateToLanding }: NotesAppProps) {
     [tabs]
   );
 
-  const createNewNote = useCallback(() => {
-    const newNote: Note = {
-      id: `note-${Date.now()}`,
-      title: "Untitled Note",
-      content: "# Untitled Note\n\nStart writing...",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      tags: [],
-    };
+  const createNewNote = useCallback(
+    (title: string, content: string) => {
+      const newNote: Note = {
+        id: `note-${Date.now()}`,
+        title: title || "Untitled Note",
+        content: content || "# Untitled Note\n\nStart writing...",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        tags: [],
+      };
 
-    setNotes((prev) => [newNote, ...prev]);
-    openNote(newNote.id);
-  }, [openNote]);
+      setNotes((prev) => [newNote, ...prev]);
+      openNote(newNote.id);
+    },
+    [openNote]
+  );
 
   const updateNoteContent = useCallback(
     (noteId: string, content: string, title?: string) => {
@@ -225,7 +228,7 @@ export function NotesApp({ onNavigateToLanding }: NotesAppProps) {
   return (
     <div className="h-screen bg-background text-foreground flex flex-col dark">
       <TopToolbar
-        onNewNote={createNewNote}
+        onCreateNote={createNewNote}
         onNewFolder={createNewFolder}
         onToggleView={() =>
           setViewMode((prev) => (prev === "editor" ? "graph" : "editor"))
