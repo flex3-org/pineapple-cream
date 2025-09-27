@@ -75,7 +75,7 @@ export function UploadFileModal({
 
     try {
       console.log(
-        `🚀 ${
+        `${
           isRetry ? `[Retry ${retryCount}/${maxRetries}] ` : ""
         }Starting Walrus upload: ${identifier} (${file.size} bytes)`
       );
@@ -89,28 +89,28 @@ export function UploadFileModal({
         },
       });
 
-      console.log(`📦 Created WalrusFile for ${file.name}`, {
+      console.log(`Created WalrusFile for ${file.name}`, {
         fileName: file.name,
         fileSize: file.size,
         fileType: file.type,
       });
 
       // Get Walrus client and start upload flow
-      console.log(`🔄 Initializing Walrus client...`);
+      console.log(`Initializing Walrus client...`);
       const walrusClient = await getWalrusClient();
 
-      console.log(`🔄 Starting Walrus upload flow...`);
+      console.log(`Starting Walrus upload flow...`);
       const uploadStart = Date.now();
 
       const flow = walrusClient.writeFilesFlow({
         files: [walrusFile],
       });
 
-      console.log(`📁 Encoding file for upload...`);
+      console.log(`Encoding file for upload...`);
       await flow.encode();
-      console.log(`✅ Encoding completed`);
+      console.log(`Encoding completed`);
 
-      console.log(`📝 Creating register transaction...`);
+      console.log(`Creating register transaction...`);
       const registerTx = flow.register({
         epochs: 2, // Store for 2 epochs (~12 days)
         owner: currentAccount.address,
@@ -118,17 +118,17 @@ export function UploadFileModal({
       });
 
       // Sign and execute the register transaction
-      console.log(`✍️ Signing register transaction...`);
+      console.log(`Signing register transaction...`);
       const registerResult = await new Promise<any>((resolve, reject) => {
         signAndExecute(
           { transaction: registerTx },
           {
             onSuccess: (result) => {
-              console.log(`✅ Space registered successfully:`, result.digest);
+              console.log(`Space registered successfully:`, result.digest);
               resolve(result);
             },
             onError: (error) => {
-              console.error(`❌ Space registration failed:`, error);
+              console.error(`Space registration failed:`, error);
               reject(error);
             },
           }
@@ -136,13 +136,13 @@ export function UploadFileModal({
       });
 
       // Upload the data to storage nodes
-      console.log(`☁️ Uploading file data to Walrus storage nodes...`);
+      console.log(`Uploading file data to Walrus storage nodes...`);
       await flow.upload({
         digest: registerResult.digest,
       });
 
       // Create and execute the certify transaction
-      console.log(`📋 Creating certify transaction...`);
+      console.log(`Creating certify transaction...`);
       const certifyTx = flow.certify();
 
       await new Promise((resolve, reject) => {
@@ -150,11 +150,11 @@ export function UploadFileModal({
           { transaction: certifyTx },
           {
             onSuccess: (result) => {
-              console.log(`✅ Certify transaction successful:`, result.digest);
+              console.log(`Certify transaction successful:`, result.digest);
               resolve(result);
             },
             onError: (error) => {
-              console.error(`❌ Certify transaction failed:`, error);
+              console.error(`Certify transaction failed:`, error);
               reject(error);
             },
           }
@@ -171,7 +171,7 @@ export function UploadFileModal({
       const blobId = uploadedFile.blobId;
       const patchId = uploadedFile.id;
 
-      console.log(`✅ Upload completed in ${Date.now() - uploadStart}ms`, {
+      console.log(`Upload completed in ${Date.now() - uploadStart}ms`, {
         blobId,
         patchId,
         identifier,
@@ -182,7 +182,7 @@ export function UploadFileModal({
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
-      console.error(`💥 Walrus upload error for ${identifier}:`, {
+      console.error(`Walrus upload error for ${identifier}:`, {
         error: errorMessage,
         retryCount,
         identifier,
@@ -207,7 +207,7 @@ export function UploadFileModal({
 
       if (isRetryableError && retryCount < maxRetries) {
         console.log(
-          `🔄 Retrying upload for ${identifier} (attempt ${retryCount + 1}/${
+          `Retrying upload for ${identifier} (attempt ${retryCount + 1}/${
             maxRetries + 1
           })`
         );
@@ -339,17 +339,17 @@ export function UploadFileModal({
         ],
       });
 
-      console.log(`📄 Signing file upload transaction...`);
+      console.log(`Signing file upload transaction...`);
       const uploadResult = await new Promise<any>((resolve, reject) => {
         signAndExecute(
           { transaction: tx as unknown as string },
           {
             onSuccess: (result) => {
-              console.log(`✅ File uploaded successfully:`, result.digest);
+              console.log(`File uploaded successfully:`, result.digest);
               resolve(result);
             },
             onError: (error) => {
-              console.error(`❌ File upload failed:`, error);
+              console.error(`File upload failed:`, error);
               reject(error);
             },
           }
@@ -363,7 +363,7 @@ export function UploadFileModal({
         success: true,
       });
 
-      toast.success("🎉 File uploaded to Walrus successfully!");
+      toast.success("File uploaded to Walrus successfully!");
 
       // Reset form
       setMetadata({
@@ -515,7 +515,7 @@ export function UploadFileModal({
               {uploadProgress.success && (
                 <div className="p-3 bg-green-900/20 border border-green-700 rounded-md">
                   <p className="text-sm text-green-400">
-                    🎉 Your file has been uploaded successfully!
+                    Your file has been uploaded successfully!
                   </p>
                 </div>
               )}

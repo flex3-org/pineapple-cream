@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "../components/ui/button";
 import { ScrollArea } from "../components/ui/scroll-area";
+import { Skeleton } from "../components/ui/skeleton";
 import {
   ChevronRight,
   ChevronDown,
@@ -8,6 +9,10 @@ import {
   Hash,
   PanelLeftClose,
   PanelLeftOpen,
+  File,
+  Image,
+  Archive,
+  Download,
 } from "lucide-react";
 import { cn } from "../lib/utils";
 import type { Note, Folder } from "./notes-app";
@@ -18,6 +23,7 @@ interface LeftSidebarProps {
   onNoteSelect: (noteId: string) => void;
   onNewNote?: () => void;
   downloadFile?: (secondary_blob_id: string, fileName: string) => void;
+  isLoading?: boolean;
 }
 
 export function LeftSidebar({
@@ -25,6 +31,7 @@ export function LeftSidebar({
   folders,
   onNoteSelect,
   downloadFile,
+  isLoading = false,
 }: LeftSidebarProps) {
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
     new Set(["notes", "files"]) // Default to expand notes and files folders
@@ -90,7 +97,32 @@ export function LeftSidebar({
       </div>
 
       <ScrollArea className="flex-1 min-h-0">
-        {isCollapsed ? (
+        {isLoading ? (
+          // Loading state
+          <div className="p-2 space-y-3">
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-full" />
+              <div className="ml-4 space-y-1">
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-6 w-2/3" />
+                <Skeleton className="h-6 w-4/5" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-full" />
+              <div className="ml-4 space-y-1">
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-6 w-1/2" />
+              </div>
+            </div>
+            <div className="mt-6 space-y-2">
+              <Skeleton className="h-4 w-16" />
+              <Skeleton className="h-6 w-2/3" />
+              <Skeleton className="h-6 w-1/2" />
+              <Skeleton className="h-6 w-3/4" />
+            </div>
+          </div>
+        ) : isCollapsed ? (
           // Collapsed view - show only icons
           <div className="p-1 space-y-1">
             {folders.map((folder) => (
@@ -155,21 +187,21 @@ export function LeftSidebar({
                         title={note.title} // Show full title on hover
                       >
                         {note.isFile ? (
-                          <span className="mr-2 flex-shrink-0">
-                            {note.fileExtension === "pdf"
-                              ? "📄"
-                              : note.fileExtension === "jpg" ||
-                                note.fileExtension === "png" ||
-                                note.fileExtension === "gif"
-                              ? "🖼️"
-                              : note.fileExtension === "zip" ||
-                                note.fileExtension === "rar"
-                              ? "📦"
-                              : note.fileExtension === "txt" ||
-                                note.fileExtension === "md"
-                              ? "📝"
-                              : "📁"}
-                          </span>
+                          note.fileExtension === "pdf" ? (
+                            <File className="h-3 w-3 mr-2 flex-shrink-0 text-red-500" />
+                          ) : note.fileExtension === "jpg" ||
+                            note.fileExtension === "png" ||
+                            note.fileExtension === "gif" ? (
+                            <Image className="h-3 w-3 mr-2 flex-shrink-0 text-green-500" />
+                          ) : note.fileExtension === "zip" ||
+                            note.fileExtension === "rar" ? (
+                            <Archive className="h-3 w-3 mr-2 flex-shrink-0 text-yellow-500" />
+                          ) : note.fileExtension === "txt" ||
+                            note.fileExtension === "md" ? (
+                            <FileText className="h-3 w-3 mr-2 flex-shrink-0 text-blue-500" />
+                          ) : (
+                            <File className="h-3 w-3 mr-2 flex-shrink-0" />
+                          )
                         ) : (
                           <FileText className="h-3 w-3 mr-2 flex-shrink-0" />
                         )}
@@ -191,7 +223,7 @@ export function LeftSidebar({
                               }}
                               className="h-6 w-6 p-0 ml-1 opacity-0 group-hover:opacity-100 hover:bg-primary/20 flex-shrink-0"
                             >
-                              ⬇️
+                              <Download className="h-3 w-3" />
                             </Button>
                           )}
                       </Button>

@@ -5,6 +5,7 @@ import { LeftSidebar } from "./left-sidebar";
 import { CenterEditor } from "./center-editor";
 import { RightSidebar } from "./right-sidebar";
 import { TopToolbar } from "./top-toolbar";
+import { Loader2 } from "lucide-react";
 
 interface VaultFileMetadata {
   original_filename: string;
@@ -47,6 +48,7 @@ export function NotesApp() {
 
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingNote, setLoadingNote] = useState(false);
   const [allObjectIds, setAllObjectIds] = useState<string[]>([]);
 
   // Query vault store object from the blockchain
@@ -75,7 +77,7 @@ export function NotesApp() {
 
       // Combine files and notes arrays
       const combinedIds = [...files, ...notes];
-      console.log("📋 Combined object IDs from vault store:", combinedIds);
+      console.log("Combined object IDs from vault store:", combinedIds);
       setAllObjectIds(combinedIds);
     }
   }, [vaultStoreData]);
@@ -266,7 +268,7 @@ export function NotesApp() {
       if (textNotes.length > 0) {
         newFolders.push({
           id: "notes",
-          name: "📝 Notes",
+          name: "Notes",
           children: textNotes.map((note) => note.id),
         });
       }
@@ -274,7 +276,7 @@ export function NotesApp() {
       if (fileNotes.length > 0) {
         newFolders.push({
           id: "files",
-          name: "📁 Files",
+          name: "Files",
           children: fileNotes.map((note) => note.id),
         });
       }
@@ -286,6 +288,14 @@ export function NotesApp() {
   const [tabs, setTabs] = useState<Tab[]>([]);
   const [activeTabId, setActiveTabId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"editor" | "graph">("editor");
+
+  const handleTabSelect = useCallback((tabId: string) => {
+    setLoadingNote(true);
+    setTimeout(() => {
+      setActiveTabId(tabId);
+      setLoadingNote(false);
+    }, 200);
+  }, []);
 
   const activeNote = activeTabId
     ? notes.find(
@@ -305,17 +315,24 @@ export function NotesApp() {
         return;
       }
 
-      // Create new tab
-      const newTab: Tab = {
-        id: `tab-${Date.now()}`,
-        noteId,
-        title: note.title,
-        isActive: true,
-        isDirty: false,
-      };
+      // Show loading state when opening a new note
+      setLoadingNote(true);
 
-      setTabs((prev) => [...prev, newTab]);
-      setActiveTabId(newTab.id);
+      // Simulate loading delay for better UX
+      setTimeout(() => {
+        // Create new tab
+        const newTab: Tab = {
+          id: `tab-${Date.now()}`,
+          noteId,
+          title: note.title,
+          isActive: true,
+          isDirty: false,
+        };
+
+        setTabs((prev) => [...prev, newTab]);
+        setActiveTabId(newTab.id);
+        setLoadingNote(false);
+      }, 300);
     },
     [notes, tabs]
   );
@@ -405,7 +422,9 @@ export function NotesApp() {
         {loading ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
-              <div className="text-4xl mb-4">⏳</div>
+              <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center mb-4">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
               <h2 className="text-xl font-semibold mb-2">
                 Loading your notes...
               </h2>
@@ -421,17 +440,19 @@ export function NotesApp() {
               folders={folders}
               onNoteSelect={openNote}
               downloadFile={downloadFile}
+              isLoading={loading}
             />
 
             <CenterEditor
               tabs={tabs}
               activeTabId={activeTabId}
               activeNote={activeNote}
-              onTabSelect={setActiveTabId}
+              onTabSelect={handleTabSelect}
               onTabClose={closeTab}
               viewMode={viewMode}
               notes={notes}
               downloadFile={downloadFile}
+              isLoadingNote={loadingNote}
             />
 
             <RightSidebar activeNote={activeNote} allNotes={notes} />

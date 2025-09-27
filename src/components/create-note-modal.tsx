@@ -59,7 +59,7 @@ export function CreateNoteModal({
 
     try {
       console.log(
-        `🚀 ${
+        `${
           isRetry ? `[Retry ${retryCount}/${maxRetries}] ` : ""
         }Starting Walrus upload for note: ${title}`
       );
@@ -80,28 +80,28 @@ export function CreateNoteModal({
         },
       });
 
-      console.log(`📦 Created WalrusFile for note: ${title}`, {
+      console.log(`Created WalrusFile for note: ${title}`, {
         fileName: `${title}.md`,
         fileSize: noteFile.size,
         fileType: "text/markdown",
       });
 
       // Get Walrus client and start upload flow
-      console.log(`🔄 Initializing Walrus client...`);
+      console.log(`Initializing Walrus client...`);
       const walrusClient = await getWalrusClient();
 
-      console.log(`🔄 Starting Walrus upload flow...`);
+      console.log(`Starting Walrus upload flow...`);
       const uploadStart = Date.now();
 
       const flow = walrusClient.writeFilesFlow({
         files: [walrusFile],
       });
 
-      console.log(`📁 Encoding note for upload...`);
+      console.log(`Encoding note for upload...`);
       await flow.encode();
-      console.log(`✅ Encoding completed`);
+      console.log(`Encoding completed`);
 
-      console.log(`📝 Creating register transaction...`);
+      console.log(`Creating register transaction...`);
       const registerTx = flow.register({
         epochs: 2, // Store for 2 epochs (~12 days)
         owner: currentAccount.address,
@@ -109,17 +109,17 @@ export function CreateNoteModal({
       });
 
       // Sign and execute the register transaction
-      console.log(`✍️ Signing register transaction...`);
+      console.log(`Signing register transaction...`);
       const registerResult = await new Promise<any>((resolve, reject) => {
         signAndExecute(
           { transaction: registerTx },
           {
             onSuccess: (result) => {
-              console.log(`✅ Space registered successfully:`, result.digest);
+              console.log(`Space registered successfully:`, result.digest);
               resolve(result);
             },
             onError: (error) => {
-              console.error(`❌ Space registration failed:`, error);
+              console.error(`Space registration failed:`, error);
               reject(error);
             },
           }
@@ -127,13 +127,13 @@ export function CreateNoteModal({
       });
 
       // Upload the data to storage nodes
-      console.log(`☁️ Uploading note data to Walrus storage nodes...`);
+      console.log(`Uploading note data to Walrus storage nodes...`);
       await flow.upload({
         digest: registerResult.digest,
       });
 
       // Create and execute the certify transaction
-      console.log(`📋 Creating certify transaction...`);
+      console.log(`Creating certify transaction...`);
       const certifyTx = flow.certify();
 
       await new Promise((resolve, reject) => {
@@ -141,11 +141,11 @@ export function CreateNoteModal({
           { transaction: certifyTx },
           {
             onSuccess: (result) => {
-              console.log(`✅ Certify transaction successful:`, result.digest);
+              console.log(`Certify transaction successful:`, result.digest);
               resolve(result);
             },
             onError: (error) => {
-              console.error(`❌ Certify transaction failed:`, error);
+              console.error(`Certify transaction failed:`, error);
               reject(error);
             },
           }
@@ -162,7 +162,7 @@ export function CreateNoteModal({
       const blobId = uploadedFile.blobId;
       const patchId = uploadedFile.id;
 
-      console.log(`✅ Upload completed in ${Date.now() - uploadStart}ms`, {
+      console.log(`Upload completed in ${Date.now() - uploadStart}ms`, {
         blobId,
         patchId,
         noteTitle: title,
@@ -173,7 +173,7 @@ export function CreateNoteModal({
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
-      console.error(`💥 Walrus upload error for note ${title}:`, {
+      console.error(`Walrus upload error for note ${title}:`, {
         error: errorMessage,
         retryCount,
         title,
@@ -198,7 +198,7 @@ export function CreateNoteModal({
 
       if (isRetryableError && retryCount < maxRetries) {
         console.log(
-          `🔄 Retrying upload for note ${title} (attempt ${retryCount + 1}/${
+          `Retrying upload for note ${title} (attempt ${retryCount + 1}/${
             maxRetries + 1
           })`
         );
@@ -298,7 +298,7 @@ export function CreateNoteModal({
         );
       });
 
-      toast.success("🎉 Note uploaded to Walrus successfully!");
+      toast.success("Note uploaded to Walrus successfully!");
 
       onSubmit(title.trim(), content);
 

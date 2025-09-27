@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Button } from "../components/ui/button";
 import { ScrollArea } from "../components/ui/scroll-area";
-import { X, FileText, Circle } from "lucide-react";
+import { Skeleton } from "../components/ui/skeleton";
+import { X, FileText, Circle, Loader2, File, Image, Archive, Download, Edit } from "lucide-react";
 import { cn } from "../lib/utils";
 import type { Note, Tab } from "./notes-app";
 import { GraphView } from "./graph-view";
@@ -15,6 +16,7 @@ interface CenterEditorProps {
   viewMode: "editor" | "graph";
   notes: Note[];
   downloadFile?: (secondary_blob_id: string, fileName: string) => void;
+  isLoadingNote?: boolean;
 }
 
 export function CenterEditor({
@@ -26,6 +28,7 @@ export function CenterEditor({
   viewMode,
   notes,
   downloadFile,
+  isLoadingNote = false,
 }: CenterEditorProps) {
   const [content, setContent] = useState("");
   const [title, setTitle] = useState("");
@@ -109,7 +112,27 @@ export function CenterEditor({
       </div>
 
       {/* Editor Area */}
-      {activeNote && (
+      {isLoadingNote ? (
+        <div className="flex-1 flex flex-col min-h-0">
+          {/* Loading Title */}
+          <div className="p-4 border-b border-border flex-shrink-0">
+            <Skeleton className="h-8 w-1/3 mb-2" />
+            <div className="flex items-center gap-4 mt-2">
+              <Skeleton className="h-3 w-24" />
+              <Skeleton className="h-3 w-24" />
+              <Skeleton className="h-3 w-32" />
+            </div>
+          </div>
+
+          {/* Loading Content */}
+          <div className="flex-1 p-4 space-y-4">
+            <div className="bg-muted/30 rounded-lg p-6 min-h-[400px] flex flex-col items-center justify-center space-y-4">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              <p className="text-muted-foreground">Loading note...</p>
+            </div>
+          </div>
+        </div>
+      ) : activeNote ? (
         <div className="flex-1 flex flex-col min-h-0">
           {/* Title - View Only */}
           <div className="p-4 border-b border-border flex-shrink-0">
@@ -142,20 +165,22 @@ export function CenterEditor({
                 <div className="space-y-4">
                   <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
                     <div className="flex items-center gap-3">
-                      <div className="text-3xl">
-                        {activeNote.fileExtension === "pdf"
-                          ? "📄"
-                          : activeNote.fileExtension === "jpg" ||
-                            activeNote.fileExtension === "png" ||
-                            activeNote.fileExtension === "gif"
-                          ? "🖼️"
-                          : activeNote.fileExtension === "zip" ||
-                            activeNote.fileExtension === "rar"
-                          ? "📦"
-                          : activeNote.fileExtension === "txt" ||
-                            activeNote.fileExtension === "md"
-                          ? "📝"
-                          : "📁"}
+                      <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
+                        {activeNote.fileExtension === "pdf" ? (
+                          <File className="h-6 w-6 text-red-500" />
+                        ) : activeNote.fileExtension === "jpg" ||
+                          activeNote.fileExtension === "png" ||
+                          activeNote.fileExtension === "gif" ? (
+                          <Image className="h-6 w-6 text-green-500" />
+                        ) : activeNote.fileExtension === "zip" ||
+                          activeNote.fileExtension === "rar" ? (
+                          <Archive className="h-6 w-6 text-yellow-500" />
+                        ) : activeNote.fileExtension === "txt" ||
+                          activeNote.fileExtension === "md" ? (
+                          <FileText className="h-6 w-6 text-blue-500" />
+                        ) : (
+                          <File className="h-6 w-6" />
+                        )}
                       </div>
                       <div>
                         <h3 className="font-semibold">{activeNote.title}</h3>
@@ -180,7 +205,8 @@ export function CenterEditor({
                         }
                         className="bg-primary hover:bg-primary/90"
                       >
-                        ⬇️ Download File
+                        <Download className="h-4 w-4 mr-2" />
+                        Download File
                       </Button>
                     )}
                   </div>
@@ -218,7 +244,11 @@ export function CenterEditor({
                                 fallbackDiv.className =
                                   "text-center text-muted-foreground mt-4";
                                 fallbackDiv.innerHTML = `
-                                <div class="text-4xl mb-2">🖼️</div>
+                                <div class="w-16 h-16 mx-auto bg-muted rounded-lg flex items-center justify-center mb-4">
+                                  <svg class="h-8 w-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                  </svg>
+                                </div>
                                 <p class="text-lg font-semibold mb-2">Unable to load image</p>
                                 <p class="text-sm">Use the download button to access the file</p>
                               `;
@@ -235,39 +265,41 @@ export function CenterEditor({
                     ) ||
                       !activeNote.secondary_blob_id ||
                       activeNote.secondary_blob_id.startsWith("walrus_")) && (
-                      <div className="text-center text-muted-foreground">
-                        <div className="text-6xl mb-4">
-                          {activeNote.fileExtension === "pdf"
-                            ? "📄"
-                            : activeNote.fileExtension === "jpg" ||
+                        <div className="text-center text-muted-foreground">
+                          <div className="w-24 h-24 mx-auto bg-muted rounded-lg flex items-center justify-center mb-4">
+                            {activeNote.fileExtension === "pdf" ? (
+                              <File className="h-12 w-12 text-red-500" />
+                            ) : activeNote.fileExtension === "jpg" ||
                               activeNote.fileExtension === "jpeg" ||
                               activeNote.fileExtension === "png" ||
                               activeNote.fileExtension === "gif" ||
-                              activeNote.fileExtension === "webp"
-                            ? "🖼️"
-                            : activeNote.fileExtension === "zip" ||
-                              activeNote.fileExtension === "rar"
-                            ? "📦"
-                            : activeNote.fileExtension === "txt" ||
-                              activeNote.fileExtension === "md"
-                            ? "📝"
-                            : "📁"}
+                              activeNote.fileExtension === "webp" ? (
+                              <Image className="h-12 w-12 text-green-500" />
+                            ) : activeNote.fileExtension === "zip" ||
+                              activeNote.fileExtension === "rar" ? (
+                              <Archive className="h-12 w-12 text-yellow-500" />
+                            ) : activeNote.fileExtension === "txt" ||
+                              activeNote.fileExtension === "md" ? (
+                              <FileText className="h-12 w-12 text-blue-500" />
+                            ) : (
+                              <File className="h-12 w-12" />
+                            )}
+                          </div>
+                          <h3 className="text-lg font-semibold mb-2">
+                            {activeNote.title}
+                          </h3>
+                          <p className="mb-4">
+                            {activeNote.fileExtension?.toUpperCase()} File
+                          </p>
+                          <p className="text-sm">
+                            {["jpg", "jpeg", "png", "gif", "webp"].includes(
+                              activeNote.fileExtension || ""
+                            )
+                              ? "Image preview not available. Use the download button to access the file."
+                              : "Use the download button above to access the file content."}
+                          </p>
                         </div>
-                        <h3 className="text-lg font-semibold mb-2">
-                          {activeNote.title}
-                        </h3>
-                        <p className="mb-4">
-                          {activeNote.fileExtension?.toUpperCase()} File
-                        </p>
-                        <p className="text-sm">
-                          {["jpg", "jpeg", "png", "gif", "webp"].includes(
-                            activeNote.fileExtension || ""
-                          )
-                            ? "Image preview not available. Use the download button to access the file."
-                            : "Use the download button above to access the file content."}
-                        </p>
-                      </div>
-                    )}
+                      )}
                   </div>
                 </div>
               ) : (
@@ -280,16 +312,16 @@ export function CenterEditor({
                       </pre>
                     </div>
                   </div>
-                  <div className="text-center text-muted-foreground text-sm p-4 bg-muted/20 rounded-lg">
-                    📝 Notes are view-only. Use "New Note" to create new
-                    content.
+                  <div className="text-center text-muted-foreground text-sm p-4 bg-muted/20 rounded-lg flex items-center justify-center gap-2">
+                    <Edit className="h-4 w-4" />
+                    Notes are view-only. Use "New Note" to create new content.
                   </div>
                 </div>
               )}
             </div>
           </ScrollArea>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

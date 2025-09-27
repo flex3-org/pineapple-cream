@@ -6,6 +6,21 @@ import { Badge } from "./ui/badge";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Skeleton } from "./ui/skeleton";
 import { useNetworkVariable } from "../networkConfig";
+import { 
+  Archive, 
+  Download, 
+  File, 
+  FileText, 
+  Folder, 
+  Globe, 
+  Lock, 
+  RefreshCw, 
+  Search, 
+  User, 
+  Database,
+  AlertCircle,
+  Terminal
+} from "lucide-react";
 
 interface VaultFileMetadata {
   original_filename: string;
@@ -63,13 +78,13 @@ export function VaultStore() {
     entry?: VaultEntry,
   ) => {
     console.log(
-      `📥 Starting file download for patch ID: "${patchId}", file: "${fileName}"`,
+      `Starting file download for patch ID: "${patchId}", file: "${fileName}"`,
     );
 
     try {
       // Early return for empty, mock, or invalid patch IDs
       if (!patchId || patchId === "" || patchId.startsWith("walrus_")) {
-        console.log(`⚠️ Cannot download: invalid patch ID "${patchId}"`);
+        console.log(`Cannot download: invalid patch ID "${patchId}"`);
         alert("No file available for this entry");
         return;
       }
@@ -78,7 +93,7 @@ export function VaultStore() {
       const AGGREGATOR_URL = "https://aggregator.walrus-testnet.walrus.space";
       const CDNLink = `${AGGREGATOR_URL}/v1/blobs/by-quilt-patch-id/${patchId}`;
 
-      console.log(`📡 Using CDN link for download: ${CDNLink}`);
+      console.log(`Using CDN link for download: ${CDNLink}`);
 
       // Determine filename for download
       let downloadFilename: string;
@@ -87,11 +102,11 @@ export function VaultStore() {
           /[<>:"/\\|?*]/g,
           "_",
         );
-        console.log(`💾 Using original filename: ${downloadFilename}`);
+        console.log(`Using original filename: ${downloadFilename}`);
       } else {
         // Fallback to entry title with appropriate extension
         downloadFilename = `${fileName.replace(/[^a-zA-Z0-9]/g, "_")}.bin`;
-        console.log(`🏷️ Generated filename: ${downloadFilename}`);
+        console.log(`Generated filename: ${downloadFilename}`);
       }
 
       // Create download link that uses the CDN
@@ -106,7 +121,7 @@ export function VaultStore() {
       document.body.removeChild(link);
 
       console.log(
-        `✅ Successfully initiated download for "${fileName}" via CDN`,
+        `Successfully initiated download for "${fileName}" via CDN`,
       );
 
       // Show confirmation message
@@ -115,12 +130,12 @@ export function VaultStore() {
         : "Unknown size";
 
       alert(
-        `📁 Download started for "${fileName}"!\n\nFile: ${downloadFilename}\nSize: ${fileSize}\nUsing CDN: ${CDNLink}`,
+        `Download started for "${fileName}"!\n\nFile: ${downloadFilename}\nSize: ${fileSize}\nUsing CDN: ${CDNLink}`,
       );
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
-      console.error(`❌ Failed to download file:`, {
+      console.error(`Failed to download file:`, {
         error: errorMessage,
         patchId,
         fileName,
@@ -158,7 +173,7 @@ export function VaultStore() {
       
       // Combine files and notes arrays
       const combinedIds = [...files, ...notes];
-      console.log("📋 Combined object IDs from vault store:", combinedIds);
+      console.log("Combined object IDs from vault store:", combinedIds);
       setAllObjectIds(combinedIds);
     }
   }, [vaultStoreData]);
@@ -184,7 +199,7 @@ export function VaultStore() {
   // No longer using events - we get IDs directly from vault store
 
   // Debug logging
-  console.log("🔍 Vault Store Debug Info:");
+  console.log("Vault Store Debug Info:");
   console.log("Package ID:", vaultPackageId);
   console.log("Vault Store Object ID:", vaultStoreObjectId);
   console.log("vaultStoreData query result:", vaultStoreData);
@@ -199,28 +214,28 @@ export function VaultStore() {
   useEffect(() => {
     // Process the vault objects when data is available
     const processVaultEntries = (objects: any[], source: string) => {
-      console.log(`🗄️ Processing vault entries from ${source}:`, objects);
+      console.log(`Processing vault entries from ${source}:`, objects);
 
       if (!objects) {
-        console.log(`❌ No objects provided from ${source}`);
+        console.log(`No objects provided from ${source}`);
         return [];
       }
 
       const processed = objects
         .map((obj, index) => {
-          console.log(`📦 Processing vault object ${index}:`, obj);
+          console.log(`Processing vault object ${index}:`, obj);
 
           const content = obj.data?.content;
           if (!content || !content.fields) {
             console.log(
-              `⚠️ Vault object ${index} missing content or fields:`,
+              `Vault object ${index} missing content or fields:`,
               obj.data,
             );
             return null;
           }
 
           const fields = content.fields;
-          console.log(`🔧 Fields for vault object ${index}:`, fields);
+          console.log(`Fields for vault object ${index}:`, fields);
 
           // Helper function to extract metadata
           const extractMetadata = (
@@ -279,7 +294,7 @@ export function VaultStore() {
             file_metadata: fields.metadata ? extractMetadata(fields.metadata) : undefined,
           };
 
-          console.log(`✅ Processed vault entry ${index} with metadata:`, {
+          console.log(`Processed vault entry ${index} with metadata:`, {
             ...vaultEntry,
             hasFileMetadata: !!vaultEntry.file_metadata,
             walrusBlobId: vaultEntry.walrus_blob_id,
@@ -289,7 +304,7 @@ export function VaultStore() {
         })
         .filter(Boolean);
 
-      console.log(`🎯 Final processed vault entries from ${source}:`, processed);
+      console.log(`Final processed vault entries from ${source}:`, processed);
       return processed;
     };
 
@@ -299,21 +314,21 @@ export function VaultStore() {
       Array.isArray(allVaultObjects) &&
       allVaultObjects.length > 0
     ) {
-      console.log("🚀 Using allVaultObjects data from multiGetObjects");
+      console.log("Using allVaultObjects data from multiGetObjects");
       const processedEntries = processVaultEntries(allVaultObjects, "multiGetObjects");
       const validEntries = processedEntries.filter(Boolean) as VaultEntry[];
 
       setVaultEntries(validEntries);
       setLoading(false);
     } else if (!isLoadingAll && allObjectIds.length > 0) {
-      console.log("⚠️ multiGetObjects completed but no data returned");
+      console.log("multiGetObjects completed but no data returned");
       console.log("allVaultObjects:", allVaultObjects);
       setLoading(false);
     } else if (!isLoadingAll && allObjectIds.length === 0) {
-      console.log("❌ No object IDs found from vault store");
+      console.log("No object IDs found from vault store");
       setLoading(false);
     } else {
-      console.log("⏳ Still loading or no data yet");
+      console.log("Still loading or no data yet");
       console.log("Debug state:", {
         isLoadingAll,
         allObjectIdsLength: allObjectIds.length,
@@ -340,8 +355,9 @@ export function VaultStore() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-foreground mb-4">
-            🗄️ Vault Store
+          <h1 className="text-3xl font-bold text-foreground mb-4 flex items-center gap-2">
+            <Database className="h-8 w-8" />
+            Vault Store
           </h1>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -364,14 +380,16 @@ export function VaultStore() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-foreground mb-4">
-            🗄️ Vault Store
+          <h1 className="text-3xl font-bold text-foreground mb-4 flex items-center gap-2">
+            <Database className="h-8 w-8" />
+            Vault Store
           </h1>
         </div>
         <Card>
           <CardContent className="p-6">
-            <p className="text-destructive">
-              ❄️ Error loading vault entries:{" "}
+            <p className="text-destructive flex items-center gap-2">
+              <AlertCircle className="h-4 w-4" />
+              Error loading vault entries:{" "}
               {(queryError as any)?.message || "Unknown error"}
             </p>
           </CardContent>
@@ -384,12 +402,15 @@ export function VaultStore() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-foreground mb-4">
-            🗄️ Vault Store
+          <h1 className="text-3xl font-bold text-foreground mb-4 flex items-center gap-2">
+            <Database className="h-8 w-8" />
+            Vault Store
           </h1>
         </div>
         <Card className="text-center p-12">
-          <div className="text-6xl mb-4">🗄️</div>
+          <div className="w-24 h-24 mx-auto bg-muted rounded-lg flex items-center justify-center mb-4">
+            <Database className="h-12 w-12 text-muted-foreground" />
+          </div>
           <h2 className="text-2xl font-semibold mb-2">No Files Stored Yet</h2>
           <p className="text-muted-foreground mb-4">
             Upload your first file to the vault!
@@ -406,8 +427,9 @@ export function VaultStore() {
     <div className="space-y-6">
       {/* Vault Header */}
       <div>
-        <h1 className="text-4xl font-bold text-foreground mb-3">
-          🗄️ Vault Files
+        <h1 className="text-4xl font-bold text-foreground mb-3 flex items-center gap-3">
+          <Database className="h-10 w-10" />
+          Vault Files
         </h1>
         <p className="text-muted-foreground text-lg">
           Browse and download files stored in your decentralized vault.
@@ -424,21 +446,24 @@ export function VaultStore() {
               size="sm"
               onClick={() => setTypeFilter("encrypted")}
             >
-              🔒 Encrypted
+              <Lock className="h-4 w-4 mr-1" />
+              Encrypted
             </Button>
             <Button
               variant={typeFilter === "public" ? "default" : "outline"}
               size="sm"
               onClick={() => setTypeFilter("public")}
             >
-              🌐 Public
+              <Globe className="h-4 w-4 mr-1" />
+              Public
             </Button>
             <Button
               variant={typeFilter === "all" ? "default" : "outline"}
               size="sm"
               onClick={() => setTypeFilter("all")}
             >
-              📁 All Files
+              <Folder className="h-4 w-4 mr-1" />
+              All Files
             </Button>
 
             {/* Owner Filter Dropdown */}
@@ -447,7 +472,7 @@ export function VaultStore() {
               onChange={(e) => setOwnerFilter(e.target.value)}
               className="px-3 py-1 border rounded-md bg-background text-foreground"
             >
-              <option value="all">👤 All Owners</option>
+              <option value="all">All Owners</option>
               {uniqueOwners.map((owner) => (
                 <option key={owner} value={owner}>
                   {formatAddress(owner)}
@@ -460,11 +485,12 @@ export function VaultStore() {
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  console.log("🔄 Manual refetch triggered");
+                  console.log("Manual refetch triggered");
                   refetchAll();
                 }}
               >
-                🔄 Refresh
+                <RefreshCw className="h-4 w-4 mr-1" />
+                Refresh
               </Button>
               <Badge variant="secondary">
                 {filteredEntries.length} of {vaultEntries.length}{" "}
@@ -479,7 +505,9 @@ export function VaultStore() {
 
       {filteredEntries.length === 0 ? (
         <Card className="text-center p-12">
-          <div className="text-6xl mb-4">🔍</div>
+          <div className="w-24 h-24 mx-auto bg-muted rounded-lg flex items-center justify-center mb-4">
+            <Search className="h-12 w-12 text-muted-foreground" />
+          </div>
           <h2 className="text-2xl font-semibold mb-2">No files found</h2>
           <p className="text-muted-foreground mb-4">
             Try adjusting your filters to see more files.
@@ -509,8 +537,12 @@ export function VaultStore() {
                       : "bg-gradient-to-br from-gray-600 to-gray-800"
                   }`}
                 >
-                  <div className="text-5xl mb-2">
-                    {entry.is_encrypted ? "🔒" : "📁"}
+                  <div className="w-16 h-16 rounded-lg bg-white/10 flex items-center justify-center mb-2">
+                    {entry.is_encrypted ? (
+                      <Lock className="h-8 w-8 text-white" />
+                    ) : (
+                      <Folder className="h-8 w-8 text-white" />
+                    )}
                   </div>
                   <p className="text-white/80 text-sm italic mb-2">
                     {entry.is_encrypted ? "Encrypted" : "Public"}
@@ -527,7 +559,8 @@ export function VaultStore() {
                         }}
                         className="bg-white/15 text-white border-white/30 hover:bg-white/25"
                       >
-                        ⬇️ Download
+                        <Download className="h-4 w-4 mr-1" />
+                        Download
                       </Button>
                     ) : null}
                 </div>
@@ -538,8 +571,12 @@ export function VaultStore() {
                     <h3 className="font-semibold truncate flex-1 mr-2">
                       {entry.title}
                     </h3>
-                    <Badge variant="secondary" className="text-xs">
-                      {entry.is_encrypted ? "🔒" : "🌐"}
+                    <Badge variant="secondary" className="text-xs flex items-center gap-1">
+                      {entry.is_encrypted ? (
+                        <Lock className="h-3 w-3" />
+                      ) : (
+                        <Globe className="h-3 w-3" />
+                      )}
                     </Badge>
                   </div>
 
@@ -592,7 +629,10 @@ export function VaultStore() {
       {/* Debug Info */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">🔍 Debug Info:</CardTitle>
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Terminal className="h-4 w-4" />
+            Debug Info:
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-xs text-muted-foreground font-mono space-y-1">
@@ -611,7 +651,7 @@ export function VaultStore() {
             size="sm"
             className="mt-2"
             onClick={() => {
-              console.log("📋 Full vault debug dump:");
+              console.log("Full vault debug dump:");
               console.table({
                 packageId: vaultPackageId,
                 vaultStoreObjectId,
@@ -623,13 +663,14 @@ export function VaultStore() {
                 hasQueryError: !!queryError,
                 isLoadingAll,
               });
-              console.log("🎯 Detailed vault data:");
+              console.log("Detailed vault data:");
               console.log("allObjectIds:", allObjectIds);
               console.log("allVaultObjects:", allVaultObjects);
               console.log("vaultStoreData:", vaultStoreData);
             }}
           >
-            📋 Console Dump
+            <Terminal className="h-4 w-4 mr-1" />
+            Console Dump
           </Button>
         </CardContent>
       </Card>
