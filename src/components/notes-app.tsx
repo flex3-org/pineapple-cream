@@ -151,6 +151,34 @@ export function NotesApp() {
     return "bin";
   };
 
+  // Helper function to extract first three letters from content for heading
+  const extractHeadingFromContent = (content: string): string => {
+    if (!content) return "Untitled";
+    
+    // Remove markdown syntax and get clean text
+    const cleanText = content
+      .replace(/#{1,6}\s+/g, '') // Remove markdown headers
+      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold markdown
+      .replace(/\*(.*?)\*/g, '$1') // Remove italic markdown
+      .replace(/`(.*?)`/g, '$1') // Remove inline code
+      .replace(/```[\s\S]*?```/g, '') // Remove code blocks
+      .replace(/\[(.*?)\]\(.*?\)/g, '$1') // Remove links, keep text
+      .replace(/^\s*[-*+]\s+/gm, '') // Remove list markers
+      .replace(/^\s*\d+\.\s+/gm, '') // Remove numbered list markers
+      .replace(/\n+/g, ' ') // Replace newlines with spaces
+      .trim();
+    
+    // Get first three meaningful characters (letters/numbers)
+    const firstThreeLetters = cleanText
+      .split('')
+      .filter(char => /[a-zA-Z0-9]/.test(char))
+      .slice(0, 3)
+      .join('')
+      .toUpperCase();
+    
+    return firstThreeLetters || "UNT";
+  };
+
   // Process vault objects and convert to notes
   useEffect(() => {
     const processVaultEntries = async (objects: any[]) => {
@@ -195,8 +223,6 @@ export function NotesApp() {
           };
         }
 
-        const title =
-          enhancedMeta.name || fileMetadata?.original_filename || "Untitled";
         const secondary_blob_id = fields.secondary_blob_id || "";
 
         let noteContent = "";
@@ -213,11 +239,17 @@ export function NotesApp() {
           const fileSize = fileMetadata?.file_size
             ? (fileMetadata.file_size / 1024 / 1024).toFixed(2) + " MB"
             : "Unknown size";
+          const fileName = enhancedMeta.name || fileMetadata?.original_filename || "Untitled File";
 
-          noteContent = `# ${title}\n\n**File Type**: ${fileExt.toUpperCase()} File\n**Size**: ${fileSize}\n**Content Type**: ${
+          noteContent = `# ${fileName}\n\n**File Type**: ${fileExt.toUpperCase()} File\n**Size**: ${fileSize}\n**Content Type**: ${
             fileMetadata?.content_type || "Unknown"
           }\n\n---\n\n*This is a file stored on the blockchain. Use the download button to access the file content.*`;
         }
+
+        // Extract title from content for notes, use original name for files
+        const title = isNote 
+          ? extractHeadingFromContent(noteContent)
+          : (enhancedMeta.name || fileMetadata?.original_filename || "UNT");
 
         const note: Note = {
           id: obj.data.objectId,

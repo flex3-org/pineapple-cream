@@ -6,6 +6,10 @@ import { X, FileText, Circle, Loader2, File, Image, Archive, Download, Edit } fr
 import { cn } from "../lib/utils";
 import type { Note, Tab } from "./notes-app";
 import { GraphView } from "./graph-view";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeHighlight from "rehype-highlight";
+import "highlight.js/styles/github-dark.css";
 
 interface CenterEditorProps {
   tabs: Tab[];
@@ -303,13 +307,88 @@ export function CenterEditor({
                   </div>
                 </div>
               ) : (
-                /* Note Content - View Only */
+                /* Note Content - View Only with Markdown Rendering */
                 <div className="space-y-4">
                   <div className="bg-muted/30 rounded-lg p-6 min-h-[400px]">
-                    <div className="prose prose-sm max-w-none dark:prose-invert">
-                      <pre className="whitespace-pre-wrap font-mono text-sm leading-relaxed">
-                        {content || "No content available"}
-                      </pre>
+                    <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-code:text-foreground prose-pre:bg-muted prose-pre:border prose-pre:border-border">
+                      {content ? (
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm]}
+                          rehypePlugins={[rehypeHighlight]}
+                          components={{
+                            // Custom styling for code blocks
+                            code: ({ className, children, ...props }: any) => {
+                              const match = /language-(\w+)/.exec(className || '');
+                              const isInline = !match;
+                              return !isInline ? (
+                                <pre className="bg-muted border border-border rounded-lg p-4 overflow-x-auto">
+                                  <code className={className} {...props}>
+                                    {children}
+                                  </code>
+                                </pre>
+                              ) : (
+                                <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono" {...props}>
+                                  {children}
+                                </code>
+                              );
+                            },
+                            // Custom styling for blockquotes
+                            blockquote: ({ children, ...props }) => (
+                              <blockquote className="border-l-4 border-primary pl-4 italic text-muted-foreground" {...props}>
+                                {children}
+                              </blockquote>
+                            ),
+                            // Custom styling for tables
+                            table: ({ children, ...props }) => (
+                              <div className="overflow-x-auto">
+                                <table className="w-full border-collapse border border-border rounded-lg" {...props}>
+                                  {children}
+                                </table>
+                              </div>
+                            ),
+                            th: ({ children, ...props }) => (
+                              <th className="border border-border bg-muted px-4 py-2 text-left font-semibold" {...props}>
+                                {children}
+                              </th>
+                            ),
+                            td: ({ children, ...props }) => (
+                              <td className="border border-border px-4 py-2" {...props}>
+                                {children}
+                              </td>
+                            ),
+                            // Custom styling for lists
+                            ul: ({ children, ...props }) => (
+                              <ul className="list-disc list-inside space-y-1" {...props}>
+                                {children}
+                              </ul>
+                            ),
+                            ol: ({ children, ...props }) => (
+                              <ol className="list-decimal list-inside space-y-1" {...props}>
+                                {children}
+                              </ol>
+                            ),
+                            // Custom styling for links
+                            a: ({ children, href, ...props }) => (
+                              <a 
+                                href={href} 
+                                className="text-primary hover:text-primary/80 underline" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                {...props}
+                              >
+                                {children}
+                              </a>
+                            ),
+                          }}
+                        >
+                          {content}
+                        </ReactMarkdown>
+                      ) : (
+                        <div className="text-center text-muted-foreground py-8">
+                          <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                          <p>No content available</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="text-center text-muted-foreground text-sm p-4 bg-muted/20 rounded-lg flex items-center justify-center gap-2">
