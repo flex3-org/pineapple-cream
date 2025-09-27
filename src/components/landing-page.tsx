@@ -1,36 +1,45 @@
-
-import { useState, useRef, useEffect } from "react"
-import { Button } from "../components/ui/button"
-import { ArrowRight, Clock, Shield, Zap, Users, Globe, ChevronRight } from "lucide-react"
+import { useState, useRef, useEffect } from "react";
+import { ConnectButton, useCurrentAccount } from "@mysten/dapp-kit";
+import { Button } from "../components/ui/button";
+import {
+  ArrowRight,
+  Clock,
+  Shield,
+  Zap,
+  Users,
+  Globe,
+  ChevronRight,
+} from "lucide-react";
 
 interface LandingPageProps {
-  onNavigateToDashboard: () => void
+  onNavigateToDashboard: () => void;
 }
 
 export function LandingPage({ onNavigateToDashboard }: LandingPageProps) {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
-  const [isHovering, setIsHovering] = useState(false)
-  const textRef = useRef<HTMLDivElement>(null)
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isHovering, setIsHovering] = useState(false);
+  const textRef = useRef<HTMLDivElement>(null);
+  const currentAccount = useCurrentAccount();
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (textRef.current && isHovering) {
-        const rect = textRef.current.getBoundingClientRect()
+        const rect = textRef.current.getBoundingClientRect();
         setMousePosition({
           x: e.clientX - rect.left,
           y: e.clientY - rect.top,
-        })
+        });
       }
-    }
+    };
 
     if (isHovering) {
-      document.addEventListener("mousemove", handleMouseMove)
+      document.addEventListener("mousemove", handleMouseMove);
     }
 
     return () => {
-      document.removeEventListener("mousemove", handleMouseMove)
-    }
-  }, [isHovering])
+      document.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, [isHovering]);
 
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden">
@@ -40,7 +49,9 @@ export function LandingPage({ onNavigateToDashboard }: LandingPageProps) {
         {/* <p className="text-sm">
           PineappleCream is now live. <span className="underline cursor-pointer">Claim your NIGHT.</span>
         </p> */}
-        <button className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:text-gray-200">×</button>
+        <button className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:text-gray-200">
+          ×
+        </button>
       </div>
 
       {/* Navigation */}
@@ -53,47 +64,97 @@ export function LandingPage({ onNavigateToDashboard }: LandingPageProps) {
         <div className="hidden md:flex items-center space-x-8">
           <button className="text-gray-300 hover:text-white transition-colors flex items-center">
             DOWNLOAD
-            <svg className="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            <svg
+              className="ml-1 h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
             </svg>
           </button>
           <button className="text-gray-300 hover:text-white transition-colors flex items-center">
             PRICING
-            <svg className="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            <svg
+              className="ml-1 h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
             </svg>
           </button>
           <button className="text-gray-300 hover:text-white transition-colors flex items-center">
             SYNC
-            <svg className="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            <svg
+              className="ml-1 h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
             </svg>
           </button>
           <button className="text-gray-300 hover:text-white transition-colors flex items-center">
             PUBLISH
-            <svg className="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            <svg
+              className="ml-1 h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
             </svg>
           </button>
-          <a href="#" className="text-gray-300 hover:text-white transition-colors">
+          <a
+            href="#"
+            className="text-gray-300 hover:text-white transition-colors"
+          >
             FAQ
           </a>
         </div>
 
-        <Button
-          onClick={onNavigateToDashboard}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium"
-        >
-          VIEW DASHBOARD
-          <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-4">
+          <ConnectButton />
+          {currentAccount && (
+            <Button
+              onClick={onNavigateToDashboard}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium"
+            >
+              VIEW DASHBOARD
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          )}
+        </div>
       </nav>
 
       {/* Hero Section */}
       <section className="relative px-6 py-32 max-w-7xl mx-auto">
         <div className="text-center">
           <div className="mb-8">
-            <p className="text-sm text-gray-400 tracking-widest uppercase mb-4">PINEAPPLECREAM</p>
+            <p className="text-sm text-gray-400 tracking-widest uppercase mb-4">
+              PINEAPPLECREAM
+            </p>
           </div>
 
           <div
@@ -152,34 +213,46 @@ export function LandingPage({ onNavigateToDashboard }: LandingPageProps) {
 
       <section className="px-6 py-20 max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-light text-white mb-6">Privacy-first blockchain infrastructure</h2>
+          <h2 className="text-4xl md:text-5xl font-light text-white mb-6">
+            Privacy-first blockchain infrastructure
+          </h2>
           <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-            The easiest way to publish your wiki, knowledge base, documentation, or digital garden.
+            The easiest way to publish your wiki, knowledge base, documentation,
+            or digital garden.
           </p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8">
           <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-8 hover:border-blue-500/50 transition-colors">
             <Shield className="h-12 w-12 text-blue-500 mb-6" />
-            <h3 className="text-xl font-semibold text-white mb-4">Zero-Knowledge Privacy</h3>
+            <h3 className="text-xl font-semibold text-white mb-4">
+              Zero-Knowledge Privacy
+            </h3>
             <p className="text-gray-400">
-              Protect sensitive data with advanced zero-knowledge proofs while maintaining blockchain verification.
+              Protect sensitive data with advanced zero-knowledge proofs while
+              maintaining blockchain verification.
             </p>
           </div>
 
           <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-8 hover:border-blue-500/50 transition-colors">
             <Zap className="h-12 w-12 text-blue-500 mb-6" />
-            <h3 className="text-xl font-semibold text-white mb-4">High Performance</h3>
+            <h3 className="text-xl font-semibold text-white mb-4">
+              High Performance
+            </h3>
             <p className="text-gray-400">
-              Built for scale with optimized consensus mechanisms and efficient transaction processing.
+              Built for scale with optimized consensus mechanisms and efficient
+              transaction processing.
             </p>
           </div>
 
           <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-8 hover:border-blue-500/50 transition-colors">
             <Users className="h-12 w-12 text-blue-500 mb-6" />
-            <h3 className="text-xl font-semibold text-white mb-4">Developer Friendly</h3>
+            <h3 className="text-xl font-semibold text-white mb-4">
+              Developer Friendly
+            </h3>
             <p className="text-gray-400">
-              Comprehensive tooling and documentation to build privacy-preserving applications with ease.
+              Comprehensive tooling and documentation to build
+              privacy-preserving applications with ease.
             </p>
           </div>
         </div>
@@ -187,7 +260,9 @@ export function LandingPage({ onNavigateToDashboard }: LandingPageProps) {
 
       <section className="px-6 py-20 max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-light text-white mb-6">Built for real-world applications</h2>
+          <h2 className="text-4xl md:text-5xl font-light text-white mb-6">
+            Built for real-world applications
+          </h2>
         </div>
 
         <div className="grid md:grid-cols-2 gap-12 items-center">
@@ -198,9 +273,12 @@ export function LandingPage({ onNavigateToDashboard }: LandingPageProps) {
                   <span className="text-white text-sm font-bold">1</span>
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-white mb-2">Financial Services</h3>
+                  <h3 className="text-xl font-semibold text-white mb-2">
+                    Financial Services
+                  </h3>
                   <p className="text-gray-400">
-                    Private transactions and compliance-ready solutions for traditional finance.
+                    Private transactions and compliance-ready solutions for
+                    traditional finance.
                   </p>
                 </div>
               </div>
@@ -210,9 +288,12 @@ export function LandingPage({ onNavigateToDashboard }: LandingPageProps) {
                   <span className="text-white text-sm font-bold">2</span>
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-white mb-2">Healthcare</h3>
+                  <h3 className="text-xl font-semibold text-white mb-2">
+                    Healthcare
+                  </h3>
                   <p className="text-gray-400">
-                    Secure patient data sharing while maintaining privacy and regulatory compliance.
+                    Secure patient data sharing while maintaining privacy and
+                    regulatory compliance.
                   </p>
                 </div>
               </div>
@@ -222,9 +303,12 @@ export function LandingPage({ onNavigateToDashboard }: LandingPageProps) {
                   <span className="text-white text-sm font-bold">3</span>
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-white mb-2">Supply Chain</h3>
+                  <h3 className="text-xl font-semibold text-white mb-2">
+                    Supply Chain
+                  </h3>
                   <p className="text-gray-400">
-                    Transparent tracking with selective disclosure of sensitive business information.
+                    Transparent tracking with selective disclosure of sensitive
+                    business information.
                   </p>
                 </div>
               </div>
@@ -233,9 +317,12 @@ export function LandingPage({ onNavigateToDashboard }: LandingPageProps) {
 
           <div className="bg-gradient-to-br from-blue-600/20 to-purple-600/20 rounded-2xl p-8 border border-blue-500/20">
             <Globe className="h-16 w-16 text-blue-400 mb-6" />
-            <h3 className="text-2xl font-semibold text-white mb-4">Global Impact</h3>
+            <h3 className="text-2xl font-semibold text-white mb-4">
+              Global Impact
+            </h3>
             <p className="text-gray-300 mb-6">
-              Join the movement towards a more private and secure digital future.
+              Join the movement towards a more private and secure digital
+              future.
             </p>
             <Button className="bg-blue-600 hover:bg-blue-700 text-white">
               Learn More
@@ -247,19 +334,30 @@ export function LandingPage({ onNavigateToDashboard }: LandingPageProps) {
 
       <section className="px-6 py-20 max-w-7xl mx-auto">
         <div className="bg-gradient-to-r from-blue-600/10 to-purple-600/10 rounded-2xl border border-blue-500/20 p-12 text-center">
-          <h2 className="text-4xl md:text-5xl font-light text-white mb-6">Ready to build with privacy?</h2>
+          <h2 className="text-4xl md:text-5xl font-light text-white mb-6">
+            Ready to build with privacy?
+          </h2>
           <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
-            Start exploring our comprehensive note-taking dashboard and discover how privacy-first development can
-            transform your workflow.
+            Start exploring our comprehensive note-taking dashboard and discover
+            how privacy-first development can transform your workflow.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button
-              onClick={onNavigateToDashboard}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg"
-            >
-              Explore Dashboard
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
+            {currentAccount ? (
+              <Button
+                onClick={onNavigateToDashboard}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg"
+              >
+                Explore Dashboard
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            ) : (
+              <div className="flex flex-col items-center gap-4">
+                <p className="text-gray-400">
+                  Connect your Sui wallet to access the dashboard
+                </p>
+                <ConnectButton />
+              </div>
+            )}
             <Button
               variant="outline"
               className="border-gray-600 text-white hover:bg-gray-800 px-8 py-3 text-lg bg-transparent"
@@ -273,7 +371,9 @@ export function LandingPage({ onNavigateToDashboard }: LandingPageProps) {
       {/* Token Distribution Section */}
       <section className="px-6 py-20 max-w-7xl mx-auto border-t border-gray-800">
         <div className="text-left">
-          <p className="text-sm text-gray-400 tracking-widest uppercase">PINEAPPLECREAM</p>
+          <p className="text-sm text-gray-400 tracking-widest uppercase">
+            PINEAPPLECREAM
+          </p>
         </div>
       </section>
 
@@ -294,5 +394,5 @@ export function LandingPage({ onNavigateToDashboard }: LandingPageProps) {
         </button>
       </div> */}
     </div>
-  )
+  );
 }

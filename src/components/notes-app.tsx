@@ -1,40 +1,58 @@
-import { useState, useCallback } from "react"
-import { LeftSidebar } from "./left-sidebar"
-import { CenterEditor } from "./center-editor"
-import { RightSidebar } from "./right-sidebar"
-import { TopToolbar } from "./top-toolbar"
+import { useState, useCallback } from "react";
+import { LeftSidebar } from "./left-sidebar";
+import { CenterEditor } from "./center-editor";
+import { RightSidebar } from "./right-sidebar";
+import { TopToolbar } from "./top-toolbar";
 
 export interface Note {
-  id: string
-  title: string
-  content: string
-  createdAt: Date
-  updatedAt: Date
-  folderId?: string
-  tags: string[]
+  id: string;
+  title: string;
+  content: string;
+  createdAt: Date;
+  updatedAt: Date;
+  folderId?: string;
+  tags: string[];
 }
 
 export interface Folder {
-  id: string
-  name: string
-  parentId?: string
-  children: string[]
+  id: string;
+  name: string;
+  parentId?: string;
+  children: string[];
 }
 
 export interface Tab {
-  id: string
-  noteId: string
-  title: string
-  isActive: boolean
-  isDirty: boolean
+  id: string;
+  noteId: string;
+  title: string;
+  isActive: boolean;
+  isDirty: boolean;
 }
 
 interface NotesAppProps {
-  onNavigateToLanding?: () => void
+  onNavigateToLanding?: () => void;
 }
 
 export function NotesApp({ onNavigateToLanding }: NotesAppProps) {
   const [notes, setNotes] = useState<Note[]>([
+    {
+      id: "blockchain-1",
+      title: "📁 My Blockchain Files",
+      content:
+        "# Blockchain Files\n\n## Uploaded Files\n\n### 📄 Project Documentation.pdf\n- **Size**: 2.3 MB\n- **Uploaded**: 2024-12-15\n- **Blob ID**: dummy_blob_1734567890_abc123\n- **Status**: ✅ Verified on Sui blockchain\n\n### 🖼️ Design Assets.zip\n- **Size**: 15.7 MB\n- **Uploaded**: 2024-12-14\n- **Blob ID**: dummy_blob_1734481490_def456\n- **Status**: ✅ Verified on Sui blockchain\n\n### 📊 Financial Report Q4.xlsx\n- **Size**: 856 KB\n- **Uploaded**: 2024-12-13\n- **Blob ID**: dummy_blob_1734395090_ghi789\n- **Status**: ✅ Verified on Sui blockchain\n\n---\n\n*All files are encrypted and stored on decentralized Walrus storage, accessible only by your wallet address.*",
+      createdAt: new Date("2024-12-15"),
+      updatedAt: new Date("2024-12-15"),
+      tags: ["blockchain", "files", "storage"],
+    },
+    {
+      id: "blockchain-2",
+      title: "🔐 Blockchain Notes",
+      content:
+        "# Blockchain Notes Collection\n\n## Recent Notes\n\n### 📝 Meeting Notes - Blockchain Integration\n- **Created**: 2024-12-15\n- **Content Size**: 1,247 characters\n- **Blob ID**: dummy_note_1734567890_xyz123\n- **Status**: ✅ Stored on blockchain\n\n### 💡 Ideas for DApp Development\n- **Created**: 2024-12-14\n- **Content Size**: 892 characters\n- **Blob ID**: dummy_note_1734481490_uvw456\n- **Status**: ✅ Stored on blockchain\n\n### 🚀 Sui Network Research\n- **Created**: 2024-12-13\n- **Content Size**: 2,156 characters\n- **Blob ID**: dummy_note_1734395090_rst789\n- **Status**: ✅ Stored on blockchain\n\n---\n\n*These notes are permanently stored on the Sui blockchain with Walrus decentralized storage. Only you can access them with your connected wallet.*",
+      createdAt: new Date("2024-12-15"),
+      updatedAt: new Date("2024-12-15"),
+      tags: ["blockchain", "notes", "decentralized"],
+    },
     {
       id: "1",
       title: "2024-08-22",
@@ -80,9 +98,14 @@ export function NotesApp({ onNavigateToLanding }: NotesAppProps) {
       updatedAt: new Date("2024-08-15"),
       tags: ["research", "technology", "satellites"],
     },
-  ])
+  ]);
 
   const [folders, setFolders] = useState<Folder[]>([
+    {
+      id: "blockchain",
+      name: "🔗 Blockchain Storage",
+      children: ["blockchain-1", "blockchain-2"],
+    },
     {
       id: "daily",
       name: "Daily Notes",
@@ -93,26 +116,28 @@ export function NotesApp({ onNavigateToLanding }: NotesAppProps) {
       name: "Research",
       children: ["4", "5"],
     },
-  ])
+  ]);
 
-  const [tabs, setTabs] = useState<Tab[]>([])
-  const [activeTabId, setActiveTabId] = useState<string | null>(null)
-  const [viewMode, setViewMode] = useState<"editor" | "graph">("editor")
+  const [tabs, setTabs] = useState<Tab[]>([]);
+  const [activeTabId, setActiveTabId] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"editor" | "graph">("editor");
 
   const activeNote = activeTabId
-    ? notes.find((note) => tabs.find((tab) => tab.id === activeTabId)?.noteId === note.id) || null
-    : null
+    ? notes.find(
+        (note) => tabs.find((tab) => tab.id === activeTabId)?.noteId === note.id
+      ) || null
+    : null;
 
   const openNote = useCallback(
     (noteId: string) => {
-      const note = notes.find((n) => n.id === noteId)
-      if (!note) return
+      const note = notes.find((n) => n.id === noteId);
+      if (!note) return;
 
       // Check if note is already open in a tab
-      const existingTab = tabs.find((tab) => tab.noteId === noteId)
+      const existingTab = tabs.find((tab) => tab.noteId === noteId);
       if (existingTab) {
-        setActiveTabId(existingTab.id)
-        return
+        setActiveTabId(existingTab.id);
+        return;
       }
 
       // Create new tab
@@ -122,27 +147,29 @@ export function NotesApp({ onNavigateToLanding }: NotesAppProps) {
         title: note.title,
         isActive: true,
         isDirty: false,
-      }
+      };
 
-      setTabs((prev) => [...prev, newTab])
-      setActiveTabId(newTab.id)
+      setTabs((prev) => [...prev, newTab]);
+      setActiveTabId(newTab.id);
     },
-    [notes, tabs],
-  )
+    [notes, tabs]
+  );
 
   const closeTab = useCallback(
     (tabId: string) => {
-      setTabs((prev) => prev.filter((tab) => tab.id !== tabId))
+      setTabs((prev) => prev.filter((tab) => tab.id !== tabId));
       setActiveTabId((currentActiveId) => {
         if (currentActiveId === tabId) {
-          const remainingTabs = tabs.filter((tab) => tab.id !== tabId)
-          return remainingTabs.length > 0 ? remainingTabs[remainingTabs.length - 1].id : null
+          const remainingTabs = tabs.filter((tab) => tab.id !== tabId);
+          return remainingTabs.length > 0
+            ? remainingTabs[remainingTabs.length - 1].id
+            : null;
         }
-        return currentActiveId
-      })
+        return currentActiveId;
+      });
     },
-    [tabs],
-  )
+    [tabs]
+  );
 
   const createNewNote = useCallback(() => {
     const newNote: Note = {
@@ -152,48 +179,57 @@ export function NotesApp({ onNavigateToLanding }: NotesAppProps) {
       createdAt: new Date(),
       updatedAt: new Date(),
       tags: [],
-    }
+    };
 
-    setNotes((prev) => [newNote, ...prev])
-    openNote(newNote.id)
-  }, [openNote])
+    setNotes((prev) => [newNote, ...prev]);
+    openNote(newNote.id);
+  }, [openNote]);
 
-  const updateNoteContent = useCallback((noteId: string, content: string, title?: string) => {
-    setNotes((prev) =>
-      prev.map((note) =>
-        note.id === noteId
-          ? {
-            ...note,
-            content,
-            title: title || note.title,
-            updatedAt: new Date(),
-          }
-          : note,
-      ),
-    )
+  const updateNoteContent = useCallback(
+    (noteId: string, content: string, title?: string) => {
+      setNotes((prev) =>
+        prev.map((note) =>
+          note.id === noteId
+            ? {
+                ...note,
+                content,
+                title: title || note.title,
+                updatedAt: new Date(),
+              }
+            : note
+        )
+      );
 
-    // Mark tab as dirty
-    setTabs((prev) =>
-      prev.map((tab) => (tab.noteId === noteId ? { ...tab, isDirty: true, title: title || tab.title } : tab)),
-    )
-  }, [])
+      // Mark tab as dirty
+      setTabs((prev) =>
+        prev.map((tab) =>
+          tab.noteId === noteId
+            ? { ...tab, isDirty: true, title: title || tab.title }
+            : tab
+        )
+      );
+    },
+    []
+  );
 
   const createNewFolder = useCallback(() => {
     const newFolder: Folder = {
       id: `folder-${Date.now()}`,
       name: "New Folder",
       children: [],
-    }
+    };
 
-    setFolders((prev) => [...prev, newFolder])
-  }, [])
+    setFolders((prev) => [...prev, newFolder]);
+  }, []);
 
   return (
     <div className="h-screen bg-background text-foreground flex flex-col dark">
       <TopToolbar
         onNewNote={createNewNote}
         onNewFolder={createNewFolder}
-        onToggleView={() => setViewMode((prev) => (prev === "editor" ? "graph" : "editor"))}
+        onToggleView={() =>
+          setViewMode((prev) => (prev === "editor" ? "graph" : "editor"))
+        }
         viewMode={viewMode}
         onNavigateToLanding={onNavigateToLanding}
       />
@@ -215,5 +251,5 @@ export function NotesApp({ onNavigateToLanding }: NotesAppProps) {
         <RightSidebar activeNote={activeNote} allNotes={notes} />
       </div>
     </div>
-  )
+  );
 }

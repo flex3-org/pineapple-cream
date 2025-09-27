@@ -1,68 +1,162 @@
-import { Button } from "../components/ui/button"
-import { Plus, Network, FolderPlus, Search, ArrowLeft } from "lucide-react"
-import { Input } from "../components/ui/input"
+import { useState } from "react";
+import { Button } from "../components/ui/button";
+import {
+  Plus,
+  Network,
+  FolderPlus,
+  Search,
+  ArrowLeft,
+  Upload,
+  FileText,
+} from "lucide-react";
+import { Input } from "../components/ui/input";
+import { UploadFileModal } from "./upload-file-modal";
+import { UploadNoteModal } from "./upload-note-modal";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+
 interface TopToolbarProps {
-  onNewNote: () => void
-  onNewFolder: () => void
-  onToggleView: () => void
-  viewMode: "editor" | "graph"
-  onNavigateToLanding?: () => void
+  onNewNote: () => void;
+  onNewFolder: () => void;
+  onToggleView: () => void;
+  viewMode: "editor" | "graph";
+  onNavigateToLanding?: () => void;
 }
 
-export function TopToolbar({ onNewNote, onNewFolder, onToggleView, viewMode, onNavigateToLanding }: TopToolbarProps) {
+export function TopToolbar({
+  onNewNote,
+  onNewFolder,
+  onToggleView,
+  viewMode,
+  onNavigateToLanding,
+}: TopToolbarProps) {
+  const [isFileModalOpen, setIsFileModalOpen] = useState(false);
+  const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
+
   return (
-    <div className="h-12 border-b border-border bg-card flex items-center justify-between px-4">
-      <div className="flex items-center gap-2">
-        {onNavigateToLanding && (
+    <>
+      <div className="h-12 border-b border-border bg-card flex items-center justify-between px-4">
+        <div className="flex items-center gap-2">
+          {onNavigateToLanding && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onNavigateToLanding}
+              className="h-8 px-2 text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              Back to Home
+            </Button>
+          )}
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 px-2 text-muted-foreground hover:text-foreground"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                New Note
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="start"
+              className="bg-gray-900 border-gray-700"
+            >
+              <DropdownMenuItem
+                onClick={onNewNote}
+                className="text-white hover:bg-gray-800 cursor-pointer"
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                Local Note
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  console.log("Blockchain Note clicked, opening modal");
+                  setIsNoteModalOpen(true);
+                }}
+                className="text-white hover:bg-gray-800 cursor-pointer"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Blockchain Note
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           <Button
             variant="ghost"
             size="sm"
-            onClick={onNavigateToLanding}
+            onClick={() => setIsFileModalOpen(true)}
             className="h-8 px-2 text-muted-foreground hover:text-foreground"
           >
-            <ArrowLeft className="h-4 w-4 mr-1" />
-            Back to Home
+            <Upload className="h-4 w-4 mr-1" />
+            Upload File
           </Button>
-        )}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onNewNote}
-          className="h-8 px-2 text-muted-foreground hover:text-foreground"
-        >
-          <Plus className="h-4 w-4 mr-1" />
-          New Note
-        </Button>
 
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onNewFolder}
-          className="h-8 px-2 text-muted-foreground hover:text-foreground"
-        >
-          <FolderPlus className="h-4 w-4 mr-1" />
-          New Folder
-        </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onNewFolder}
+            className="h-8 px-2 text-muted-foreground hover:text-foreground"
+          >
+            <FolderPlus className="h-4 w-4 mr-1" />
+            New Folder
+          </Button>
 
-        <div className="w-px h-4 bg-border mx-2" />
+          <div className="w-px h-4 bg-border mx-2" />
 
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onToggleView}
-          className={`h-8 px-2 ${viewMode === "graph" ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground"}`}
-        >
-          <Network className="h-4 w-4 mr-1" />
-          Graph View
-        </Button>
-      </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggleView}
+            className={`h-8 px-2 ${
+              viewMode === "graph"
+                ? "text-primary bg-primary/10"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Network className="h-4 w-4 mr-1" />
+            Graph View
+          </Button>
+        </div>
 
-      <div className="flex items-center gap-2">
-        <div className="relative">
-          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-muted-foreground" />
-          <Input placeholder="Search notes..." className="w-64 h-8 pl-7 bg-muted/50 border-0 text-sm" />
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-muted-foreground" />
+            <Input
+              placeholder="Search notes..."
+              className="w-64 h-8 pl-7 bg-muted/50 border-0 text-sm"
+            />
+          </div>
         </div>
       </div>
-    </div>
-  )
+
+      {/* Upload Modals */}
+      <UploadFileModal
+        isOpen={isFileModalOpen}
+        onClose={() => setIsFileModalOpen(false)}
+        onSuccess={(fileId) => {
+          console.log("File uploaded successfully:", fileId);
+          // You can add logic here to refresh the file list or show success message
+        }}
+      />
+
+      <UploadNoteModal
+        isOpen={isNoteModalOpen}
+        onClose={() => {
+          console.log("Closing note modal");
+          setIsNoteModalOpen(false);
+        }}
+        onSuccess={(noteId) => {
+          console.log("Note uploaded successfully:", noteId);
+          // You can add logic here to refresh the note list or show success message
+        }}
+      />
+    </>
+  );
 }
