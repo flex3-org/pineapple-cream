@@ -13,8 +13,6 @@ interface VaultFileMetadata {
   upload_timestamp: number;
 }
 
-
-
 export interface Note {
   id: string;
   title: string;
@@ -46,7 +44,7 @@ export interface Tab {
 
 export function NotesApp() {
   const vaultStoreObjectId = useNetworkVariable("vaultStoreObjectId");
-  
+
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
   const [allObjectIds, setAllObjectIds] = useState<string[]>([]);
@@ -62,16 +60,19 @@ export function NotesApp() {
     },
     {
       enabled: !!vaultStoreObjectId,
-    },
+    }
   );
 
   // Extract file and note IDs from vault store data
   useEffect(() => {
-    if (vaultStoreData?.data?.content && 'fields' in vaultStoreData.data.content) {
+    if (
+      vaultStoreData?.data?.content &&
+      "fields" in vaultStoreData.data.content
+    ) {
       const fields = vaultStoreData.data.content.fields as any;
       const files = fields.files || [];
       const notes = fields.notes || [];
-      
+
       // Combine files and notes arrays
       const combinedIds = [...files, ...notes];
       console.log("📋 Combined object IDs from vault store:", combinedIds);
@@ -92,11 +93,13 @@ export function NotesApp() {
     },
     {
       enabled: allObjectIds.length > 0,
-    },
+    }
   );
 
   // Function to fetch content from CDN
-  const fetchContentFromCDN = async (secondary_blob_id: string): Promise<string> => {
+  const fetchContentFromCDN = async (
+    secondary_blob_id: string
+  ): Promise<string> => {
     if (!secondary_blob_id || secondary_blob_id.startsWith("walrus_")) {
       return "";
     }
@@ -104,12 +107,12 @@ export function NotesApp() {
     try {
       const AGGREGATOR_URL = "https://aggregator.walrus-testnet.walrus.space";
       const CDNLink = `${AGGREGATOR_URL}/v1/blobs/by-quilt-patch-id/${secondary_blob_id}`;
-      
+
       const response = await fetch(CDNLink);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const content = await response.text();
       return content;
     } catch (error) {
@@ -119,26 +122,29 @@ export function NotesApp() {
   };
 
   // Helper function to get file extension from filename or content type
-  const getFileExtension = (filename?: string, contentType?: string): string => {
+  const getFileExtension = (
+    filename?: string,
+    contentType?: string
+  ): string => {
     if (filename) {
-      const ext = filename.split('.').pop()?.toLowerCase();
+      const ext = filename.split(".").pop()?.toLowerCase();
       if (ext) return ext;
     }
-    
+
     if (contentType) {
       const typeMap: { [key: string]: string } = {
-        'application/pdf': 'pdf',
-        'image/jpeg': 'jpg',
-        'image/png': 'png',
-        'image/gif': 'gif',
-        'text/plain': 'txt',
-        'application/json': 'json',
-        'text/markdown': 'md',
+        "application/pdf": "pdf",
+        "image/jpeg": "jpg",
+        "image/png": "png",
+        "image/gif": "gif",
+        "text/plain": "txt",
+        "application/json": "json",
+        "text/markdown": "md",
       };
-      return typeMap[contentType] || 'bin';
+      return typeMap[contentType] || "bin";
     }
-    
-    return 'bin';
+
+    return "bin";
   };
 
   // Process vault objects and convert to notes
@@ -185,20 +191,28 @@ export function NotesApp() {
           };
         }
 
-        const title = enhancedMeta.name || fileMetadata?.original_filename || "Untitled";
+        const title =
+          enhancedMeta.name || fileMetadata?.original_filename || "Untitled";
         const secondary_blob_id = fields.secondary_blob_id || "";
-        
+
         let noteContent = "";
-        
+
         if (isNote && secondary_blob_id) {
           // For notes, fetch content from CDN
           noteContent = await fetchContentFromCDN(secondary_blob_id);
         } else if (!isNote) {
           // For files, create a display content showing file info
-          const fileExt = getFileExtension(fileMetadata?.original_filename, fileMetadata?.content_type);
-          const fileSize = fileMetadata?.file_size ? (fileMetadata.file_size / 1024 / 1024).toFixed(2) + " MB" : "Unknown size";
-          
-          noteContent = `# ${title}\n\n**File Type**: ${fileExt.toUpperCase()} File\n**Size**: ${fileSize}\n**Content Type**: ${fileMetadata?.content_type || "Unknown"}\n\n---\n\n*This is a file stored on the blockchain. Use the download button to access the file content.*`;
+          const fileExt = getFileExtension(
+            fileMetadata?.original_filename,
+            fileMetadata?.content_type
+          );
+          const fileSize = fileMetadata?.file_size
+            ? (fileMetadata.file_size / 1024 / 1024).toFixed(2) + " MB"
+            : "Unknown size";
+
+          noteContent = `# ${title}\n\n**File Type**: ${fileExt.toUpperCase()} File\n**Size**: ${fileSize}\n**Content Type**: ${
+            fileMetadata?.content_type || "Unknown"
+          }\n\n---\n\n*This is a file stored on the blockchain. Use the download button to access the file content.*`;
         }
 
         const note: Note = {
@@ -209,7 +223,12 @@ export function NotesApp() {
           updatedAt: new Date(fileMetadata?.upload_timestamp || Date.now()),
           tags: isNote ? ["note", "blockchain"] : ["file", "blockchain"],
           isFile: !isNote,
-          fileExtension: !isNote ? getFileExtension(fileMetadata?.original_filename, fileMetadata?.content_type) : undefined,
+          fileExtension: !isNote
+            ? getFileExtension(
+                fileMetadata?.original_filename,
+                fileMetadata?.content_type
+              )
+            : undefined,
           secondary_blob_id,
           file_metadata: fileMetadata,
         };
@@ -221,7 +240,11 @@ export function NotesApp() {
       setLoading(false);
     };
 
-    if (allVaultObjects && Array.isArray(allVaultObjects) && allVaultObjects.length > 0) {
+    if (
+      allVaultObjects &&
+      Array.isArray(allVaultObjects) &&
+      allVaultObjects.length > 0
+    ) {
       processVaultEntries(allVaultObjects);
     } else if (!isLoadingAll && allObjectIds.length > 0) {
       setLoading(false);
@@ -232,30 +255,30 @@ export function NotesApp() {
 
   // Create dynamic folders based on note types
   const [folders, setFolders] = useState<Folder[]>([]);
-  
+
   useEffect(() => {
     if (notes.length > 0) {
-      const fileNotes = notes.filter(note => note.isFile);
-      const textNotes = notes.filter(note => !note.isFile);
-      
+      const fileNotes = notes.filter((note) => note.isFile);
+      const textNotes = notes.filter((note) => !note.isFile);
+
       const newFolders: Folder[] = [];
-      
+
       if (textNotes.length > 0) {
         newFolders.push({
           id: "notes",
           name: "📝 Notes",
-          children: textNotes.map(note => note.id),
+          children: textNotes.map((note) => note.id),
         });
       }
-      
+
       if (fileNotes.length > 0) {
         newFolders.push({
           id: "files",
           name: "📁 Files",
-          children: fileNotes.map(note => note.id),
+          children: fileNotes.map((note) => note.id),
         });
       }
-      
+
       setFolders(newFolders);
     }
   }, [notes]);
@@ -378,20 +401,24 @@ export function NotesApp() {
         viewMode={viewMode}
       />
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex min-h-0">
         {loading ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
               <div className="text-4xl mb-4">⏳</div>
-              <h2 className="text-xl font-semibold mb-2">Loading your notes...</h2>
-              <p className="text-muted-foreground">Fetching data from blockchain</p>
+              <h2 className="text-xl font-semibold mb-2">
+                Loading your notes...
+              </h2>
+              <p className="text-muted-foreground">
+                Fetching data from blockchain
+              </p>
             </div>
           </div>
         ) : (
           <>
-            <LeftSidebar 
-              notes={notes} 
-              folders={folders} 
+            <LeftSidebar
+              notes={notes}
+              folders={folders}
               onNoteSelect={openNote}
               downloadFile={downloadFile}
             />
