@@ -154,28 +154,28 @@ export function NotesApp() {
   // Helper function to extract first three letters from content for heading
   const extractHeadingFromContent = (content: string): string => {
     if (!content) return "Untitled";
-    
+
     // Remove markdown syntax and get clean text
     const cleanText = content
-      .replace(/#{1,6}\s+/g, '') // Remove markdown headers
-      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold markdown
-      .replace(/\*(.*?)\*/g, '$1') // Remove italic markdown
-      .replace(/`(.*?)`/g, '$1') // Remove inline code
-      .replace(/```[\s\S]*?```/g, '') // Remove code blocks
-      .replace(/\[(.*?)\]\(.*?\)/g, '$1') // Remove links, keep text
-      .replace(/^\s*[-*+]\s+/gm, '') // Remove list markers
-      .replace(/^\s*\d+\.\s+/gm, '') // Remove numbered list markers
-      .replace(/\n+/g, ' ') // Replace newlines with spaces
+      .replace(/#{1,6}\s+/g, "") // Remove markdown headers
+      .replace(/\*\*(.*?)\*\*/g, "$1") // Remove bold markdown
+      .replace(/\*(.*?)\*/g, "$1") // Remove italic markdown
+      .replace(/`(.*?)`/g, "$1") // Remove inline code
+      .replace(/```[\s\S]*?```/g, "") // Remove code blocks
+      .replace(/\[(.*?)\]\(.*?\)/g, "$1") // Remove links, keep text
+      .replace(/^\s*[-*+]\s+/gm, "") // Remove list markers
+      .replace(/^\s*\d+\.\s+/gm, "") // Remove numbered list markers
+      .replace(/\n+/g, " ") // Replace newlines with spaces
       .trim();
-    
+
     // Get first three meaningful characters (letters/numbers)
     const firstThreeLetters = cleanText
-      .split('')
-      .filter(char => /[a-zA-Z0-9]/.test(char))
+      .split("")
+      .filter((char) => /[a-zA-Z0-9]/.test(char))
       .slice(0, 3)
-      .join('')
+      .join("")
       .toUpperCase();
-    
+
     return firstThreeLetters || "UNT";
   };
 
@@ -239,7 +239,10 @@ export function NotesApp() {
           const fileSize = fileMetadata?.file_size
             ? (fileMetadata.file_size / 1024 / 1024).toFixed(2) + " MB"
             : "Unknown size";
-          const fileName = enhancedMeta.name || fileMetadata?.original_filename || "Untitled File";
+          const fileName =
+            enhancedMeta.name ||
+            fileMetadata?.original_filename ||
+            "Untitled File";
 
           noteContent = `# ${fileName}\n\n**File Type**: ${fileExt.toUpperCase()} File\n**Size**: ${fileSize}\n**Content Type**: ${
             fileMetadata?.content_type || "Unknown"
@@ -247,9 +250,9 @@ export function NotesApp() {
         }
 
         // Extract title from content for notes, use original name for files
-        const title = isNote 
+        const title = isNote
           ? extractHeadingFromContent(noteContent)
-          : (enhancedMeta.name || fileMetadata?.original_filename || "UNT");
+          : enhancedMeta.name || fileMetadata?.original_filename || "UNT";
 
         const note: Note = {
           id: obj.data.objectId,
@@ -271,9 +274,11 @@ export function NotesApp() {
         };
 
         // Only add notes owned by the current user
-        if (currentAccount?.address && 
-            note.owner && 
-            note.owner.toLowerCase() === currentAccount.address.toLowerCase()) {
+        if (
+          currentAccount?.address &&
+          note.owner &&
+          note.owner.toLowerCase() === currentAccount.address.toLowerCase()
+        ) {
           processedNotes.push(note);
         }
       }
@@ -495,7 +500,22 @@ export function NotesApp() {
               isLoadingNote={loadingNote}
             />
 
-            <RightSidebar activeNote={activeNote} allNotes={notes} />
+            <RightSidebar
+              activeNote={activeNote}
+              chatContext={{
+                conversationId: `conv_${Date.now()}`,
+                topic: activeNote?.title || "General Discussion",
+                messages: [
+                  {
+                    role: "user",
+                    content: `Analyzing content: ${
+                      activeNote?.title || "Untitled"
+                    }`,
+                    timestamp: new Date().toISOString(),
+                  },
+                ],
+              }}
+            />
           </>
         )}
       </div>

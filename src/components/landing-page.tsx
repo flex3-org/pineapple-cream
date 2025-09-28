@@ -2,15 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { ConnectButton, useCurrentAccount } from "@mysten/dapp-kit";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
-import {
-  ArrowRight,
-  Clock,
-  Shield,
-  Zap,
-  Users,
-  Globe,
-  ChevronRight,
-} from "lucide-react";
+import { ArrowRight, Shield, Zap, Users, Globe } from "lucide-react";
 
 export function LandingPage() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -62,7 +54,10 @@ export function LandingPage() {
       {/* Navigation */}
       <nav className="flex items-center justify-between p-6 max-w-7xl mx-auto">
         <div className="flex items-center space-x-2">
-          <Clock className="h-8 w-8 text-white" />
+          <a href="/">
+            <img className="w-8 h-10" src="/logo.png" alt="img-logo" />
+          </a>
+
           <span className="text-xl font-bold">PineappleCream</span>
         </div>
 
@@ -177,9 +172,7 @@ export function LandingPage() {
           >
             {/* Base text - always visible */}
             <h1 className="text-6xl md:text-8xl font-light text-white leading-tight select-none">
-              Blah blah blah
-              <br />
-              blah blah
+              Store files, notes, <br /> and documents privately.
             </h1>
 
             {/* Hidden text layer - only visible through blue circle mask */}
@@ -191,7 +184,9 @@ export function LandingPage() {
                 right: "-200px",
                 bottom: "-200px",
                 clipPath: isHovering
-                  ? `circle(150px at ${mousePosition.x + 200}px ${mousePosition.y + 200}px)`
+                  ? `circle(150px at ${mousePosition.x + 200}px ${
+                      mousePosition.y + 200
+                    }px)`
                   : "circle(0px at 50% 50%)",
                 transition: "clip-path 0.2s ease-out",
               }}
@@ -201,9 +196,7 @@ export function LandingPage() {
 
               {/* Hidden text */}
               <h1 className="text-6xl md:text-8xl font-light text-black leading-tight select-none relative z-10">
-                wiow Blah blah blah
-                <br />
-                blah csjkd blah
+                Smart organization <br /> that adapts to you.
               </h1>
             </div>
           </div>
@@ -224,11 +217,10 @@ export function LandingPage() {
       <section className="px-6 py-20 max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-light text-white mb-6">
-            Give your ideas a safe place.
+            A decentralized home for your idea
           </h2>
           <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-            The easiest way to publish your wiki, knowledge base, documentation,
-            or digital treasure.
+            Hook: “From private files to public knowledge, all in one place.
           </p>
         </div>
 
@@ -236,33 +228,33 @@ export function LandingPage() {
           <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-8 hover:border-[#97F0E5]/500/50 transition-colors">
             <Shield className="h-12 w-12 text-[#97F0E5] mb-6" />
             <h3 className="text-xl font-semibold text-white mb-4">
-              Zero-Knowledge Privacy
+              Smart Organization
             </h3>
             <p className="text-gray-400">
-              Protect sensitive data with advanced zero-knowledge proofs while
-              maintaining blockchain verification.
+              Automatically tag, categorize, and connect your files and notes
+              for instant discoverability
             </p>
           </div>
 
           <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-8 hover:border-[#97F0E5]/500/50 transition-colors">
             <Zap className="h-12 w-12 text-[#97F0E5] mb-6" />
             <h3 className="text-xl font-semibold text-white mb-4">
-              High Performance
+              Decentralized Ownership
             </h3>
             <p className="text-gray-400">
-              Built for scale with optimized consensus mechanisms and efficient
-              transaction processing.
+              Store your data securely on blockchain and decentralized storage
+              while retaining full control.
             </p>
           </div>
 
           <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-8 hover:border-[#97F0E5]/500/50 transition-colors">
             <Users className="h-12 w-12 text-[#97F0E5] mb-6" />
             <h3 className="text-xl font-semibold text-white mb-4">
-              Developer Friendly
+              Secure Sharing
             </h3>
             <p className="text-gray-400">
-              Comprehensive tooling and documentation to build
-              privacy-preserving applications with ease.
+              Share content publicly, privately, or via one-time temporary
+              access links with confidence.
             </p>
           </div>
         </div>
@@ -271,7 +263,7 @@ export function LandingPage() {
       <section className="px-6 py-20 max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-light text-white mb-6">
-            Built for real-world applications
+            Built for real-world knowledge management
           </h2>
         </div>
 
@@ -284,11 +276,11 @@ export function LandingPage() {
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold text-white mb-2">
-                    Financial Services
+                    Students & Educators
                   </h3>
                   <p className="text-gray-400">
-                    Private transactions and compliance-ready solutions for
-                    traditional finance.
+                    Organize notes, share study material, and create
+                    collaborative knowledge bases securely.
                   </p>
                 </div>
               </div>
@@ -299,11 +291,11 @@ export function LandingPage() {
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold text-white mb-2">
-                    Healthcare
+                    Freelancers & Creators
                   </h3>
                   <p className="text-gray-400">
-                    Secure patient data sharing while maintaining privacy and
-                    regulatory compliance.
+                    Store projects, assets, and documents with full ownership
+                    and temporary sharing options.
                   </p>
                 </div>
               </div>
@@ -314,11 +306,11 @@ export function LandingPage() {
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold text-white mb-2">
-                    Supply Chain
+                    Researchers & Professionals
                   </h3>
                   <p className="text-gray-400">
-                    Transparent tracking with selective disclosure of sensitive
-                    business information.
+                    Manage sensitive data, papers, and insights while keeping
+                    full control and traceability.
                   </p>
                 </div>
               </div>
@@ -328,16 +320,12 @@ export function LandingPage() {
           <div className="bg-gradient-to-br from-[#97F0E5]/20 to-purple-600/20 rounded-2xl p-8 border border-[#97F0E5]/500/20">
             <Globe className="h-16 w-16 text-[#97F0E5]/400 mb-6" />
             <h3 className="text-2xl font-semibold text-white mb-4">
-              Global Impact
+              Ready to take control of your knowledge?
             </h3>
             <p className="text-gray-300 mb-6">
-              Join the movement towards a more private and secure digital
-              future.
+              Start writing, organizing, and sharing your files and notes
+              securely with PineappleCream’s decentralized dashboard.
             </p>
-            <Button className="bg-[#97F0E5] hover:bg-[#97F0E5]/700 text-black">
-              Learn More
-              <ChevronRight className="ml-2 h-4 w-4" />
-            </Button>
           </div>
         </div>
       </section>
@@ -368,12 +356,6 @@ export function LandingPage() {
                 <ConnectButton />
               </div>
             )}
-            <Button
-              variant="outline"
-              className="border-gray-600 text-white hover:bg-gray-800 px-8 py-3 text-lg bg-transparent"
-            >
-              View Documentation
-            </Button>
           </div>
         </div>
       </section>
@@ -386,23 +368,6 @@ export function LandingPage() {
           </p>
         </div>
       </section>
-
-      {/* Floating action buttons (bottom right)
-      <div className="fixed bottom-6 right-6 flex flex-col space-y-3">
-        <button className="w-12 h-12 bg-gray-800 hover:bg-gray-700 rounded-full flex items-center justify-center transition-colors">
-          <Clock className="h-6 w-6 text-white" />
-        </button>
-        <button className="w-12 h-12 bg-black hover:bg-gray-900 rounded-full flex items-center justify-center transition-colors border border-gray-700">
-          <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-        </button>
-      </div> */}
     </div>
   );
 }
