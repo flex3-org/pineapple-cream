@@ -6,7 +6,6 @@ import {
   ChevronRight,
   ChevronDown,
   FileText,
-  Hash,
   PanelLeftClose,
   PanelLeftOpen,
   File,
@@ -150,7 +149,7 @@ export function LeftSidebar({
           <div className="p-2">
             {/* Folders */}
             {folders.map((folder) => (
-              <div key={folder.id} className="mb-2">
+              <div key={folder.id} className="mb-6">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -163,8 +162,10 @@ export function LeftSidebar({
                     <ChevronRight className="h-3 w-3 mr-1 flex-shrink-0" />
                   )}
                   <FileText className="h-3 w-3 mr-2 flex-shrink-0" />
-                  <span className="text-sm truncate flex-1 text-left">
-                    {folder.name}
+                  <span className="text-sm truncate flex-1 text-left max-w-[160px]">
+                    {folder.name.length > 25
+                      ? `${folder.name.slice(0, 22)}...`
+                      : folder.name}
                   </span>
                   <span className="ml-2 text-xs text-muted-foreground flex-shrink-0">
                     {getNotesInFolder(folder.id).length}
@@ -205,8 +206,10 @@ export function LeftSidebar({
                         ) : (
                           <FileText className="h-3 w-3 mr-2 flex-shrink-0" />
                         )}
-                        <span className="text-sm truncate flex-1 text-left min-w-0">
-                          {note.title}
+                        <span className="text-sm truncate flex-1 text-left min-w-0 max-w-[160px]">
+                          {note.title.length > 25
+                            ? `${note.title.slice(0, 22)}...`
+                            : note.title}
                         </span>
                         {note.isFile &&
                           note.secondary_blob_id &&
@@ -235,7 +238,7 @@ export function LeftSidebar({
 
             {/* Unorganized Notes */}
             {getUnorganizedNotes().length > 0 && (
-              <div className="mb-2">
+              <div className="mb-6">
                 <div className="px-2 py-1">
                   <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Other Notes
@@ -256,44 +259,16 @@ export function LeftSidebar({
                       title={note.title} // Show full title on hover
                     >
                       <FileText className="h-3 w-3 mr-2 flex-shrink-0" />
-                      <span className="text-sm truncate flex-1 text-left min-w-0">
-                        {note.title}
+                      <span className="text-sm truncate flex-1 text-left min-w-0 max-w-[160px]">
+                        {note.title.length > 25
+                          ? `${note.title.slice(0, 22)}...`
+                          : note.title}
                       </span>
                     </Button>
                   ))}
                 </div>
               </div>
             )}
-
-            {/* Tags Section */}
-            <div className="mt-6">
-              <div className="px-2 py-1">
-                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Tags
-                </span>
-              </div>
-              <div className="space-y-1">
-                {Array.from(new Set(notes.flatMap((note) => note.tags)))
-                  .filter(Boolean)
-                  .map((tag) => (
-                    <Button
-                      key={tag}
-                      variant="ghost"
-                      size="sm"
-                      className="w-full justify-start h-8 px-2 text-sidebar-foreground hover:bg-sidebar-accent min-w-0"
-                      title={tag} // Show full tag on hover
-                    >
-                      <Hash className="h-3 w-3 mr-2 flex-shrink-0" />
-                      <span className="text-sm truncate flex-1 text-left min-w-0">
-                        {tag}
-                      </span>
-                      <span className="text-xs text-muted-foreground ml-2 flex-shrink-0">
-                        {notes.filter((note) => note.tags.includes(tag)).length}
-                      </span>
-                    </Button>
-                  ))}
-              </div>
-            </div>
           </div>
         )}
       </ScrollArea>

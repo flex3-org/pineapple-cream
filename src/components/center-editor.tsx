@@ -2,7 +2,17 @@ import { useState, useEffect } from "react";
 import { Button } from "../components/ui/button";
 import { ScrollArea } from "../components/ui/scroll-area";
 import { Skeleton } from "../components/ui/skeleton";
-import { X, FileText, Circle, Loader2, File, Image, Archive, Download, Edit } from "lucide-react";
+import {
+  X,
+  FileText,
+  Circle,
+  Loader2,
+  File,
+  Image,
+  Archive,
+  Download,
+  Edit,
+} from "lucide-react";
 import { cn } from "../lib/utils";
 import type { Note, Tab } from "./notes-app";
 import { GraphView } from "./graph-view";
@@ -80,7 +90,7 @@ export function CenterEditor({
     <div className="flex-1 bg-background flex flex-col min-h-0">
       {/* Tab Bar */}
       <div className="border-b border-border bg-card flex-shrink-0">
-        <ScrollArea className="w-full">
+        <ScrollArea className="w-[600px]">
           <div className="flex">
             {tabs.map((tab) => (
               <div
@@ -217,7 +227,7 @@ export function CenterEditor({
 
                   {/* File Preview Area - Images Only with IMG tag */}
                   <div className="bg-muted/30 rounded-lg p-4 min-h-[400px]">
-                    {/* Image Preview - ONLY using IMG tag */}
+                    {/* Image Preview inside fixed media frame */}
                     {(activeNote.fileExtension === "jpg" ||
                       activeNote.fileExtension === "jpeg" ||
                       activeNote.fileExtension === "png" ||
@@ -225,18 +235,13 @@ export function CenterEditor({
                       activeNote.fileExtension === "webp") &&
                       activeNote.secondary_blob_id &&
                       !activeNote.secondary_blob_id.startsWith("walrus_") && (
-                        <div className="text-center">
+                        <div className="media-frame">
                           <img
                             src={`https://aggregator.walrus-testnet.walrus.space/v1/blobs/by-quilt-patch-id/${activeNote.secondary_blob_id}`}
                             alt={`${activeNote.title} preview`}
-                            style={{
-                              width: "100%",
-                              maxWidth: "100%",
-                              maxHeight: "600px",
-                              objectFit: "contain",
-                              borderRadius: "8px",
-                              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-                            }}
+                            className="responsive-img"
+                            loading="lazy"
+                            decoding="async"
                             onError={(e) => {
                               // Fallback when image fails to load
                               const target = e.target as HTMLImageElement;
@@ -269,41 +274,41 @@ export function CenterEditor({
                     ) ||
                       !activeNote.secondary_blob_id ||
                       activeNote.secondary_blob_id.startsWith("walrus_")) && (
-                        <div className="text-center text-muted-foreground">
-                          <div className="w-24 h-24 mx-auto bg-muted rounded-lg flex items-center justify-center mb-4">
-                            {activeNote.fileExtension === "pdf" ? (
-                              <File className="h-12 w-12 text-red-500" />
-                            ) : activeNote.fileExtension === "jpg" ||
-                              activeNote.fileExtension === "jpeg" ||
-                              activeNote.fileExtension === "png" ||
-                              activeNote.fileExtension === "gif" ||
-                              activeNote.fileExtension === "webp" ? (
-                              <Image className="h-12 w-12 text-green-500" />
-                            ) : activeNote.fileExtension === "zip" ||
-                              activeNote.fileExtension === "rar" ? (
-                              <Archive className="h-12 w-12 text-yellow-500" />
-                            ) : activeNote.fileExtension === "txt" ||
-                              activeNote.fileExtension === "md" ? (
-                              <FileText className="h-12 w-12 text-blue-500" />
-                            ) : (
-                              <File className="h-12 w-12" />
-                            )}
-                          </div>
-                          <h3 className="text-lg font-semibold mb-2">
-                            {activeNote.title}
-                          </h3>
-                          <p className="mb-4">
-                            {activeNote.fileExtension?.toUpperCase()} File
-                          </p>
-                          <p className="text-sm">
-                            {["jpg", "jpeg", "png", "gif", "webp"].includes(
-                              activeNote.fileExtension || ""
-                            )
-                              ? "Image preview not available. Use the download button to access the file."
-                              : "Use the download button above to access the file content."}
-                          </p>
+                      <div className="text-center text-muted-foreground">
+                        <div className="w-24 h-24 mx-auto bg-muted rounded-lg flex items-center justify-center mb-4">
+                          {activeNote.fileExtension === "pdf" ? (
+                            <File className="h-12 w-12 text-red-500" />
+                          ) : activeNote.fileExtension === "jpg" ||
+                            activeNote.fileExtension === "jpeg" ||
+                            activeNote.fileExtension === "png" ||
+                            activeNote.fileExtension === "gif" ||
+                            activeNote.fileExtension === "webp" ? (
+                            <Image className="h-12 w-12 text-green-500" />
+                          ) : activeNote.fileExtension === "zip" ||
+                            activeNote.fileExtension === "rar" ? (
+                            <Archive className="h-12 w-12 text-yellow-500" />
+                          ) : activeNote.fileExtension === "txt" ||
+                            activeNote.fileExtension === "md" ? (
+                            <FileText className="h-12 w-12 text-blue-500" />
+                          ) : (
+                            <File className="h-12 w-12" />
+                          )}
                         </div>
-                      )}
+                        <h3 className="text-lg font-semibold mb-2">
+                          {activeNote.title}
+                        </h3>
+                        <p className="mb-4">
+                          {activeNote.fileExtension?.toUpperCase()} File
+                        </p>
+                        <p className="text-sm">
+                          {["jpg", "jpeg", "png", "gif", "webp"].includes(
+                            activeNote.fileExtension || ""
+                          )
+                            ? "Image preview not available. Use the download button to access the file."
+                            : "Use the download button above to access the file content."}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
               ) : (
@@ -318,7 +323,9 @@ export function CenterEditor({
                           components={{
                             // Custom styling for code blocks
                             code: ({ className, children, ...props }: any) => {
-                              const match = /language-(\w+)/.exec(className || '');
+                              const match = /language-(\w+)/.exec(
+                                className || ""
+                              );
                               const isInline = !match;
                               return !isInline ? (
                                 <pre className="bg-muted border border-border rounded-lg p-4 overflow-x-auto">
@@ -327,57 +334,91 @@ export function CenterEditor({
                                   </code>
                                 </pre>
                               ) : (
-                                <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono" {...props}>
+                                <code
+                                  className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono"
+                                  {...props}
+                                >
                                   {children}
                                 </code>
                               );
                             },
                             // Custom styling for blockquotes
                             blockquote: ({ children, ...props }) => (
-                              <blockquote className="border-l-4 border-primary pl-4 italic text-muted-foreground" {...props}>
+                              <blockquote
+                                className="border-l-4 border-primary pl-4 italic text-muted-foreground"
+                                {...props}
+                              >
                                 {children}
                               </blockquote>
                             ),
                             // Custom styling for tables
                             table: ({ children, ...props }) => (
                               <div className="overflow-x-auto">
-                                <table className="w-full border-collapse border border-border rounded-lg" {...props}>
+                                <table
+                                  className="w-full border-collapse border border-border rounded-lg"
+                                  {...props}
+                                >
                                   {children}
                                 </table>
                               </div>
                             ),
                             th: ({ children, ...props }) => (
-                              <th className="border border-border bg-muted px-4 py-2 text-left font-semibold" {...props}>
+                              <th
+                                className="border border-border bg-muted px-4 py-2 text-left font-semibold"
+                                {...props}
+                              >
                                 {children}
                               </th>
                             ),
                             td: ({ children, ...props }) => (
-                              <td className="border border-border px-4 py-2" {...props}>
+                              <td
+                                className="border border-border px-4 py-2"
+                                {...props}
+                              >
                                 {children}
                               </td>
                             ),
                             // Custom styling for lists
                             ul: ({ children, ...props }) => (
-                              <ul className="list-disc list-inside space-y-1" {...props}>
+                              <ul
+                                className="list-disc list-inside space-y-1"
+                                {...props}
+                              >
                                 {children}
                               </ul>
                             ),
                             ol: ({ children, ...props }) => (
-                              <ol className="list-decimal list-inside space-y-1" {...props}>
+                              <ol
+                                className="list-decimal list-inside space-y-1"
+                                {...props}
+                              >
                                 {children}
                               </ol>
                             ),
                             // Custom styling for links
                             a: ({ children, href, ...props }) => (
-                              <a 
-                                href={href} 
-                                className="text-primary hover:text-primary/80 underline" 
-                                target="_blank" 
+                              <a
+                                href={href}
+                                className="text-primary hover:text-primary/80 underline"
+                                target="_blank"
                                 rel="noopener noreferrer"
                                 {...props}
                               >
                                 {children}
                               </a>
+                            ),
+                            // Images: wrap in fixed media frame to prevent layout shifts
+                            img: ({ src, alt, ...props }: any) => (
+                              <div className="media-frame">
+                                <img
+                                  src={src}
+                                  alt={alt || "image"}
+                                  className="responsive-img"
+                                  loading="lazy"
+                                  decoding="async"
+                                  {...props}
+                                />
+                              </div>
                             ),
                           }}
                         >
