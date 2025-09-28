@@ -3,7 +3,7 @@ import { Button } from "../components/ui/button";
 import { PanelRightClose, PanelRightOpen, Brain } from "lucide-react";
 import { cn } from "../lib/utils";
 import type { Note } from "./notes-app";
-import { extractTextFromPDFWithRetry } from "../lib/pdf-extractor";
+import { extractTextFromPDF } from "../lib/pdf-extractor";
 
 interface RightSidebarProps {
   activeNote: Note | null;
@@ -40,7 +40,21 @@ export function RightSidebar({ activeNote }: RightSidebarProps) {
       const pdfUrl = `https://aggregator.walrus-testnet.walrus.space/v1/blobs/by-quilt-patch-id/${note.secondary_blob_id}`;
 
       try {
-        const extractionResult = await extractTextFromPDFWithRetry(pdfUrl, 10);
+        // Fetch the PDF file from the URL
+        const response = await fetch(pdfUrl);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch PDF: ${response.status}`);
+        }
+
+        const blob = await response.blob();
+        const file = new File([blob], note.title, { type: "application/pdf" });
+
+        const extractedText = await extractTextFromPDF(file, 10);
+        const extractionResult = {
+          text: extractedText,
+          error: null,
+          pageCount: 1,
+        };
 
         if (extractionResult.error) {
           // Fallback to metadata if extraction fails

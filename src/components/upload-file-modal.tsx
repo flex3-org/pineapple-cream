@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { Upload, FileText } from "lucide-react";
 import { getWalrusClient } from "../lib/walrus";
 import { WalrusFile } from "@mysten/walrus";
+import { extractTextFromFile, getContentTag } from "../lib/pdf-extractor";
 
 interface FileMetadata {
   filename: string;
@@ -44,6 +45,8 @@ export function UploadFileModal({
   const [metadata, setMetadata] = useState<FileMetadata>({
     filename: "",
   });
+
+  const [contentTag, setContentTag] = useState<string>("");
 
   const [uploadProgress, setUploadProgress] = useState<{
     step: string;
@@ -270,8 +273,27 @@ export function UploadFileModal({
 
     try {
       setUploadProgress({
-        step: "Step 1/3: Uploading file to Walrus...",
-        progress: 33,
+        step: "Step 1/4: Analyzing file content...",
+        progress: 25,
+        isUploading: true,
+      });
+
+      // Extract text and get content tag
+      let tag = "";
+      try {
+        const extractedText = await extractTextFromFile(metadata.file, 10);
+        tag = await getContentTag(extractedText);
+        setContentTag(tag);
+        console.log(`Content tag generated: ${tag}`);
+      } catch (error) {
+        console.warn("Failed to generate content tag, using fallback:", error);
+        tag = "untagged";
+        setContentTag(tag);
+      }
+
+      setUploadProgress({
+        step: "Step 2/4: Uploading file to Walrus...",
+        progress: 50,
         isUploading: true,
       });
 
@@ -283,8 +305,8 @@ export function UploadFileModal({
       );
 
       setUploadProgress({
-        step: "Step 2/3: Registering on blockchain...",
-        progress: 66,
+        step: "Step 3/4: Registering on blockchain...",
+        progress: 75,
         isUploading: true,
       });
 
@@ -308,6 +330,7 @@ export function UploadFileModal({
         arguments: [
           tx.object(vaultStoreObjectId), // VaultStore shared object ID
           tx.pure.address(currentAccount.address),
+          tx.pure.vector("u8", Array.from(new TextEncoder().encode(tag))), // Content tag
           tx.pure.vector(
             "u8",
             Array.from(new TextEncoder().encode(walrusResult.blobId))
@@ -357,7 +380,7 @@ export function UploadFileModal({
       });
 
       setUploadProgress({
-        step: "Step 3/3: File uploaded successfully!",
+        step: "Step 4/4: File uploaded successfully!",
         progress: 100,
         isUploading: false,
         success: true,
@@ -369,6 +392,7 @@ export function UploadFileModal({
       setMetadata({
         filename: "",
       });
+      setContentTag("");
 
       // Call success callback
       onSuccess?.(uploadResult.digest);
@@ -428,6 +452,7 @@ export function UploadFileModal({
       setMetadata({
         filename: "",
       });
+      setContentTag("");
       setUploadProgress({
         step: "Ready to upload",
         progress: 0,
@@ -486,10 +511,17 @@ export function UploadFileModal({
               </Button>
             </div>
             {metadata.file && (
-              <p className="text-sm text-gray-400">
-                Selected: {metadata.file.name} (
-                {(metadata.file.size / 1024).toFixed(1)} KB)
-              </p>
+              <div className="space-y-1">
+                <p className="text-sm text-gray-400">
+                  Selected: {metadata.file.name} (
+                  {(metadata.file.size / 1024).toFixed(1)} KB)
+                </p>
+                {contentTag && (
+                  <p className="text-sm text-blue-400">
+                    Content Tag: {contentTag}
+                  </p>
+                )}
+              </div>
             )}
           </div>
 
