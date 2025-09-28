@@ -2,20 +2,47 @@
 
 A decentralized platform for secure file storage, knowledge management, and content sharing built on Sui blockchain with Walrus decentralized storage.
 
-## What PineappleCream Does
+## What is PineappleCream?
 
-PineappleCream is a **decentralized knowledge management platform** that allows users to:
+PineappleCream is a **decentralized knowledge management platform** that revolutionizes how users store, organize, and share their digital content. Built on blockchain technology, it provides true ownership of data while offering intelligent organization and privacy-first features.
 
-- **Upload & Store Files**: Securely store documents, images, videos, and any file type on decentralized storage
-- **Create & Manage Notes**: Rich markdown-based note-taking with real-time editing
-- **Smart Organization**: Automatic tagging and categorization of content using AI
-- **Secure Sharing**: Blockchain-verified ownership with planned temporary access features
-- **Visual Knowledge Graph**: Interactive graph view showing relationships between your content
-- **Privacy-First**: Zero-knowledge privacy with encrypted storage options
+The platform combines the security of blockchain verification with the efficiency of decentralized storage, creating a censorship-resistant system where users maintain complete control over their files, documents, images, and notes.
 
-## Technical Architecture
+## Core Features
 
-### Frontend Stack
+### 🔒 **Decentralized Storage**
+- Upload any file type to Walrus decentralized storage network
+- Blockchain-verified ownership and metadata tracking
+- CDN-based downloads for optimal performance
+- No central servers - truly decentralized architecture
+
+### 📝 **Smart Note-Taking**
+- Rich markdown-based editor with real-time editing
+- Tab-based interface for managing multiple notes
+- Automatic content analysis and tagging
+- Visual knowledge graph showing content relationships
+
+### 🤖 **AI-Powered Organization**
+- Automatic file categorization and tagging using KeyBERT
+- Smart content analysis for weaknesses, strengths, and improvements
+- Dynamic folder generation based on content types
+- Intelligent content recommendations
+
+### 🔐 **Privacy & Security**
+- Zero-knowledge privacy with optional encryption
+- Blockchain-based ownership verification
+- Access control with smart contract permissions
+- Planned temporary sharing features for one-time viewing
+
+### 🏷️ **Smart Auto-Tagging & Organization**
+- Automatic content analysis and intelligent tagging for all documents
+- AI-powered categorization based on content type, topics, and context
+- Smart folder generation and content grouping
+- Quick access to relevant data through tag-based filtering and search
+
+## Tech Stack
+
+### **Frontend**
 - **React 18** with TypeScript
 - **Vite** for build tooling and development
 - **Tailwind CSS** for styling
@@ -23,116 +50,82 @@ PineappleCream is a **decentralized knowledge management platform** that allows 
 - **Sui dApp Kit** for blockchain integration
 - **React Router** for navigation
 
-### Blockchain & Storage
+### **Blockchain & Storage**
 - **Sui Blockchain** for smart contracts and ownership verification
 - **Move Language** for smart contract development
 - **Walrus** decentralized storage network for file content
 - **CDN Integration** for efficient file delivery
 
-### Smart Contracts
-- **VaultStore**: Central contract managing all uploads and metadata
-- **UserFile/UserNote**: Individual file and note objects with ownership
-- **Access Control**: Encryption and permission management functions
-
-### AI Services
+### **AI Services**
 - **FastAPI** backend for text analysis
 - **KeyBERT** for automatic keyword extraction and tagging
-- **Ollama** integration for advanced text analysis (weakness, strength, improvements, recommendations)
+- **Ollama** integration for advanced text analysis
 
-## Prerequisites
+## Quick Start
 
+### Prerequisites
 - **Node.js** (v18 or higher)
 - **pnpm** or npm package manager
 - **Sui CLI** for blockchain interactions
 - **Python 3.8+** for AI services
 - **Ollama** (optional, for advanced AI features)
 
-## Installation & Setup
+### Installation
 
-### 1. Clone the Repository
+1. **Clone the Repository**
 ```bash
 git clone <repository-url>
 cd notes-app
 ```
 
-### 2. Install Dependencies
+2. **Install Dependencies**
 ```bash
 # Install frontend dependencies
-pnpm install
-
-# Install Python dependencies for AI services
-cd api
-pip install -r requirements.txt
-cd ..
+npm install
 ```
 
-### 3. Configure Network Variables
-Update `src/networkConfig.ts` with your deployed contract addresses:
-```typescript
-export const networkConfig = {
-  vaultPackageId: "0xYOUR_PACKAGE_ID",
-  vaultStoreObjectId: "0xYOUR_STORE_OBJECT_ID"
-};
-```
-
-### 4. Deploy Smart Contracts (Optional)
+3. **And Finally...**
 ```bash
-# Deploy Move contracts to Sui testnet
-sui move build
-sui client publish --gas-budget 100000000
+# Install frontend dependencies
+npm run dev
 ```
 
-### 5. Start Development Servers
+## Usage Guide
 
-**Frontend (Main Application):**
-```bash
-pnpm dev
-```
+### 🔗 **Connect Wallet**
+1. Open the application in your browser
+2. Click "Connect Wallet" and select your Sui wallet
+3. Approve the connection to access the dashboard
 
-**AI Services (Optional):**
-```bash
-# Start Ollama server
-ollama serve
+### 📤 **Upload Files**
+1. Click "Upload File" in the toolbar
+2. Select your file and provide a filename
+3. Monitor upload progress as the file is uploaded to Walrus storage
+4. File metadata is automatically registered on Sui blockchain
 
-# Start FastAPI backend
-cd api
-python main.py
-```
+### 📝 **Create Notes**
+1. Click "New Note" to create a markdown note
+2. Use the rich text editor with markdown support
+3. Notes are automatically saved and tagged using AI
+4. Switch between multiple notes using the tab interface
 
-## Usage
+### 🗂️ **Organize Content**
+1. Files and notes are automatically categorized into folders
+2. Use the graph view to visualize relationships between content
+3. Search and filter by tags, file types, or content
+4. Drag and drop files for quick organization
 
-### 1. Connect Wallet
-- Open the application in your browser
-- Click "Connect Wallet" and select your Sui wallet
-- Approve the connection
+### 📥 **Download Files**
+1. Click the download button on any file card
+2. Files are retrieved directly from Walrus CDN
+3. Original filenames and metadata are preserved
+4. Download progress is shown in real-time
 
-### 2. Upload Files
-- Click "Upload File" in the toolbar
-- Select your file and provide a filename
-- The file will be uploaded to Walrus storage and registered on Sui blockchain
-- Monitor upload progress in the modal
-
-### 3. Create Notes
-- Click "New Note" to create a markdown note
-- Use the rich text editor with markdown support
-- Notes are automatically saved and tagged
-
-### 4. Organize Content
-- Files and notes are automatically categorized into folders
-- Use the graph view to see relationships between content
-- Search and filter by tags, file types, or content
-
-### 5. Download Files
-- Click the download button on any file card
-- Files are retrieved directly from Walrus CDN
-- Original filenames and metadata are preserved
-
-## API Endpoints
-
-### Text Analysis API (`/api`)
-- `POST /analyze` - Analyze text for weaknesses, strengths, improvements, and recommendations
-- `POST /get_tag` - Extract keywords and generate tags for content
-- `GET /` - Health check endpoint
+### 🏷️ **Smart Organization**
+1. Documents are automatically analyzed and tagged using AI
+2. Tags help categorize content by topic, type, and relevance
+3. Use tag-based filtering to quickly find relevant documents
+4. Smart folders automatically organize content for easy access
 
 ## Project Structure
 
@@ -140,45 +133,131 @@ python main.py
 notes-app/
 ├── src/
 │   ├── components/          # React components
-│   │   ├── ui/             # Reusable UI components
+│   │   ├── ui/             # Reusable UI components (Radix-based)
 │   │   ├── notes-app.tsx   # Main application component
-│   │   ├── upload-file-modal.tsx
-│   │   ├── graph-view.tsx  # Knowledge graph visualization
-│   │   └── ...
+│   │   ├── upload-file-modal.tsx  # File upload interface
+│   │   ├── smart-organizer.tsx  # AI-powered content organization
+│   │   ├── vault-store.tsx # Vault management interface
+│   │   ├── left-sidebar.tsx # Navigation sidebar
+│   │   ├── center-editor.tsx # Main editor interface
+│   │   └── right-sidebar.tsx # Content metadata panel
 │   ├── lib/                # Utility functions
+│   │   ├── utils.ts        # General utilities
+│   │   └── walrus.ts       # Walrus storage integration
 │   ├── hooks/              # Custom React hooks
+│   ├── constants.ts        # Application constants
+│   ├── networkConfig.ts    # Blockchain network configuration
 │   └── main.tsx           # Application entry point
 ├── move/
 │   └── vault.move         # Sui Move smart contracts
 ├── api/
 │   └── main.py           # FastAPI backend for AI services
 ├── public/               # Static assets
-└── dist/                 # Build output
+├── dist/                 # Build output
+└── package.json          # Dependencies and scripts
 ```
 
-## Key Features
+## Smart Contracts
 
-### Decentralized Storage
-- Files stored on Walrus network with blockchain verification
-- CDN-based downloads for optimal performance
-- Automatic metadata extraction and storage
+### **VaultStore Contract**
+The central smart contract that manages all file and note uploads:
 
-### Smart Organization
-- AI-powered content tagging using KeyBERT
-- Automatic file type detection and categorization
-- Visual graph showing content relationships
+```move
+struct VaultStore has key {
+    id: UID,
+    admin: address,
+    files: vector<ID>,      // File object IDs
+    notes: vector<ID>,      // Note object IDs
+    total_files: u64,
+    total_notes: u64,
+}
+```
 
-### Security & Privacy
-- Blockchain-based ownership verification
-- Optional encryption for sensitive content
-- Zero-knowledge privacy features
+**Key Functions:**
+- `upload_file_entry()` - Register new files on blockchain
+- `upload_note_entry()` - Register new notes on blockchain
+- `get_vault_stats()` - Retrieve platform statistics
+- `is_vault_admin()` - Admin access control
 
-### User Experience
-- Modern dark theme interface
-- Responsive design for all devices
-- Real-time editing with tab management
-- Drag-and-drop file uploads
+### **UserFile Contract**
+Individual file objects with comprehensive metadata:
 
+```move
+struct UserFile has key, store {
+    id: UID,
+    owner: address,
+    walrus_blob_id: String,        // Walrus storage reference
+    metadata: FileMetadata,        // File details
+    enhanced_metadata: String,     // JSON metadata
+    secondary_blob_id: String,     // For partial encryption
+    seal_encryption_id: String,    // Encryption keys
+}
+```
+
+**Key Functions:**
+- `verify_file_ownership()` - Ownership verification
+- `get_file_info()` - Retrieve file metadata
+- `transfer_file()` - Transfer ownership
+- `seal_approve_file_access()` - Access control for encrypted files
+
+### **UserNote Contract**
+Note objects with content management:
+
+```move
+struct UserNote has key, store {
+    id: UID,
+    owner: address,
+    content_blob_id: String,        // Content storage reference
+    metadata: NoteMetadata,        // Note details
+    enhanced_metadata: String,     // JSON metadata
+    secondary_blob_id: String,     // For partial encryption
+    seal_encryption_id: String,    // Encryption keys
+}
+```
+
+**Key Functions:**
+- `verify_note_ownership()` - Ownership verification
+- `get_note_info()` - Retrieve note metadata
+- `transfer_note()` - Transfer ownership
+- `seal_approve_note_access()` - Access control for encrypted notes
+
+### **Security Features**
+- **Ownership Verification**: Blockchain-based proof of ownership
+- **Access Control**: Smart contract permissions for encrypted content
+- **Transfer Capabilities**: Secure ownership transfer between users
+- **Metadata Integrity**: Immutable file and note metadata on blockchain
+
+## Future Vision
+
+### **Phase 1: Enhanced AI Integration** 🧠
+- **Advanced Auto-Tagging**: More sophisticated content analysis and tagging algorithms
+- **Smart Recommendations**: AI-powered content suggestions based on tags and patterns
+- **Automated Summarization**: Automatic content summarization and key point extraction
+- **Multi-language Support**: AI translation and analysis across languages
+
+### **Phase 2: Collaboration Features** 👥
+- **Team Workspaces**: Shared vaults for collaborative projects
+- **Real-time Collaboration**: Live editing and commenting on shared content
+- **Permission Management**: Granular access controls for team members
+- **Version Control**: Track changes and maintain content history
+
+### **Phase 3: Advanced Sharing** 🔗
+- **Temporary Access Links**: One-time viewing links with expiration
+- **Public Knowledge Base**: Option to publish content publicly
+- **Content Monetization**: Token-based access to premium content
+- **Cross-platform Integration**: API for third-party applications
+
+### **Phase 4: Ecosystem Expansion** 🌐
+- **Plugin System**: Extensible architecture for custom functionality
+- **Mobile Applications**: Native iOS and Android apps
+- **Enterprise Features**: Advanced security and compliance tools
+- **Decentralized Marketplace**: Community-driven content marketplace
+
+### **Long-term Goals** 🚀
+- **Web3 Integration**: Full decentralization with IPFS and other protocols
+- **AI Agent Network**: Autonomous AI agents for content management
+- **Cross-chain Compatibility**: Support for multiple blockchain networks
+- **Global Knowledge Graph**: Connect with other decentralized knowledge platforms
 
 ---
 
